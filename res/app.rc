@@ -1,0 +1,68 @@
+#pragma code_page(65001)  /* UTF-8 */
+
+#define APSTUDIO_READONLY_SYMBOLS
+
+#ifndef APSTUDIO_INVOKED
+#include "../src/config.h"
+#endif
+#include "../src/resource.h"
+
+#define APSTUDIO_HIDDEN_SYMBOLS
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <commctrl.h>
+#undef APSTUDIO_HIDDEN_SYMBOLS
+
+#undef APSTUDIO_READONLY_SYMBOLS
+
+#define DIALOG_FONTNAME "Segoe UI"
+#define DIALOG_FONTSIZE 9
+
+#define PAGE_WIDTH 230
+#define PAGE_HEIGHT 240
+
+/* Style definitions */
+
+#define DS_PAGE DS_SHELLFONT | DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | \
+                WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+
+#define CBS_LIST CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     VERSION
+PRODUCTVERSION  VERSION
+FILEOS          VOS_NT_WINDOWS32
+FILETYPE        VFT_APP
+BEGIN
+BLOCK "StringFileInfo"
+BEGIN
+	BLOCK "040904B0"
+	BEGIN
+		VALUE "CompanyName",       "Torto"
+		VALUE "FileDescription",   "Taskbar and Start Menu Properties"
+		VALUE "FileVersion",       VERSION_STR
+		VALUE "InternalName",      "TbConf"
+		VALUE "LegalCopyright",    "Licenced under the GPLv2"
+		VALUE "OriginalFilename",  "TbConf.exe"
+		VALUE "ProductName",       "Taskbar Configurator"
+		VALUE "ProductVersion",    VERSION_STR
+	END
+END
+BLOCK "VarFileInfo"
+BEGIN
+	VALUE "Translation", LANG_ENGLISH, SUBLANG_ENGLISH_US
+#if !defined(MINIMAL)
+		, LANG_SPANISH, SUBLANG_SPANISH_MODERN
+#endif
+END
+END
+
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "TbConf.exe.manifest"
+
+#include "lang/en-US.h"
+
+#if !defined(MINIMAL)
+#include "lang/es-ES.h"
+#endif

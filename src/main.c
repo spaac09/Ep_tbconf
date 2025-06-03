@@ -104,7 +104,7 @@ _Success_(return < RETURN_ERROR)
 static
 UINT DisplayPropSheet(UINT nStartPage) {
     PROPSHEETHEADER psh;
-    HPROPSHEETPAGE hpsp[2];
+    HPROPSHEETPAGE hpsp[3];
 
     memset(&psh, 0, sizeof(PROPSHEETHEADER));
     psh.dwSize = sizeof(PROPSHEETHEADER);
@@ -124,7 +124,7 @@ UINT DisplayPropSheet(UINT nStartPage) {
 	else {
 	InitPage(&psh, IDD_10SM, StartMenu10PageProc);
 	}
-	/*InitPage(&psh, IDD_ADV, AdvancedPageProc);*/
+	InitPage(&psh, IDD_ADV, AdvancedPageProc);
 
     INT_PTR ret = PropertySheet(&psh);
 

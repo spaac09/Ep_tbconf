@@ -15,13 +15,16 @@
 
 #define EnableApply() \
     SendMessage(g_propSheet.hWnd, PSM_CHANGED, (WPARAM)g_hDlg, 0L)
+
+#define SetComboIndex(iControl, index) \
+    SendDlgItemMessage(g_hDlg, iControl, CB_SETCURSEL, (WPARAM)index, 0L)	
 	
 static const TCHAR g_explorerPatcherKey[] =
     TEXT("Software\\ExplorerPatcher");
 	
 typedef struct tagTBSETTINGS
 {
-    BOOL bMode;
+    BOOL iMode;
 
 } TBSETTINGS;
 
@@ -31,24 +34,37 @@ static TBSETTINGS g_newSettings;
 static HWND g_hDlg;
 
 static
-void LoadDefaultSettings(void)
+void InitComboBoxes(void)
 {
-    g_oldSettings.bMode = FALSE;
+    int iElement;
+    TCHAR text[60] = TEXT("\0");
+
+#define InitCombo(iControl, iString, nElements) \
+    for (iElement = 0; iElement < nElements; iElement++) { \
+        LoadString(g_propSheet.hInstance, iString + iElement, \
+            (TCHAR *)&text, 59); \
+        SendDlgItemMessage(g_hDlg, iControl, CB_ADDSTRING, 0L, (LPARAM)&text); \
+    }
+
+    InitCombo(IDC_SM_10DLG_MODE, IDS_TB_POS_L, 4);
+
+#undef InitCombo
 }
 
-static
+
+_Success_(return)
+/*static
 void LoadRegSettings(void)
 {
     HKEY hKey;
-    LSTATUS status;
     DWORD dwType;
     DWORD dwData = 0;
     DWORD dwSize;
 
 #define ReadDword(valueName) \
     dwSize = sizeof(DWORD); \
-    status = RegQueryValueEx(hKey, valueName, 0, \
-        &dwType, (BYTE *)&dwData, &dwSize)
+    status = RegQueryValueEx(hKey, valueName, 0, &dwType, \
+        (BYTE *)&dwData, &dwSize)
 
 #define ReadInt(valueName, member) \
     ReadDword(valueName); \
@@ -60,24 +76,31 @@ void LoadRegSettings(void)
     if (status == ERROR_SUCCESS && dwType == REG_DWORD) \
         g_oldSettings.member = !dwData
 
-    status = RegOpenKeyEx(HKEY_CURRENT_USER, g_explorerPatcherKey, 0,
+    LSTATUS status = RegOpenKeyEx(HKEY_CURRENT_USER, g_explorerPatcherKey, 0,
         KEY_QUERY_VALUE, &hKey);
-    if (status == ERROR_SUCCESS)
-    {
-        ReadInt(TEXT("StartUI_EnableRoundedCorners"), bMode);
-        RegCloseKey(hKey);
-    }
-    
+    if (status != ERROR_SUCCESS)
+        return;
+
+    ReadInt(TEXT("StartUI_EnableRoundedCorners"), iMode);
+
+    RegCloseKey(hKey);
+
 #undef ReadInvertedBool
 #undef ReadInt
 #undef ReadDword
+}*/
+
+static
+void LoadDefaultSettings(void)
+{
+    g_oldSettings.iMode = FALSE;
 }
+
 
 static
 void LoadSettings(void)
 {
     LoadDefaultSettings();
-    LoadRegSettings();
 
     g_newSettings = g_oldSettings;
 }
@@ -85,40 +108,43 @@ void LoadSettings(void)
 static
 void UpdateControls(void)
 {
-#define SetChecked(iControl, bChecked) \
-    SendDlgItemMessage(g_hDlg, iControl, \
-        BM_SETCHECK, (WPARAM)(bChecked == 1), 0L)
+    SetComboIndex(IDC_SM_10DLG, g_oldSettings.iMode);
 
-    SetChecked(IDC_SM_10DLG_MODE, g_oldSettings.bMode);
-
-#undef SetChecked
 }
+
 
 static
 void InitPage(void)
 {
     LoadSettings();
-    UpdateControls();
+    InitComboBoxes();
+	UpdateControls();
 }
 
 #define HasChanged(member) \
     (g_newSettings.member != g_oldSettings.member)
 
-_Success_(return)
 static
 BOOL WriteRegSettings(void)
 {
-    HKEY hKey;
-    LSTATUS status;
-    BOOL ret = TRUE;
-    DWORD dwData;
-
 #define RestoreSetting(member) \
     g_newSettings.member = g_oldSettings.member
 
+    HKEY hKey;
+    LSTATUS status = RegCreateKeyEx(HKEY_CURRENT_USER, g_explorerPatcherKey, 0, NULL, 0,
+        KEY_SET_VALUE, NULL, &hKey, NULL);
+    if (status != ERROR_SUCCESS)
+    {
+        RestoreSetting(iMode);
+        return FALSE;
+    }
+
+    BOOL ret = TRUE;
+    DWORD dwData;
+
 #define SetDword(valueName) \
-    status = RegSetValueEx( \
-        hKey, valueName, 0, REG_DWORD, (BYTE *)&dwData, sizeof(DWORD))
+    status = RegSetValueEx(hKey, valueName, 0, REG_DWORD, \
+        (BYTE *)&dwData, sizeof(DWORD))
 
 #define UpdateDword(valueName, member) \
     if (HasChanged(member)) { \
@@ -140,34 +166,23 @@ BOOL WriteRegSettings(void)
         } \
     }
 
-    if (HasChanged(bMode)) {
-        status = RegCreateKeyEx(HKEY_CURRENT_USER, g_explorerPatcherKey, 0, NULL,
-            0, KEY_SET_VALUE, NULL, &hKey, NULL);
-        if (status == ERROR_SUCCESS)
-        {
-            UpdateDword(TEXT("StartUI_EnableRoundedCorners"), bMode);
-            RegCloseKey(hKey);
-        }
-        else
-        {
-            RestoreSetting(bMode);
-			ret = FALSE;
-        }
-    }
-
+    UpdateDword(TEXT("StartUI_EnableRoundedCorners"), iMode);
 
 #undef UpdateDwordInverted
 #undef UpdateDword
 #undef SetDword
-#undef RestoreSetting
+
+    RegCloseKey(hKey);
 
     return ret;
+
+#undef RestoreSetting
 }
 
 static
 void ApplySettings(void)
 {
-    BOOL bSendSettingChange = HasChanged(bMode);
+    BOOL bSendSettingChange = HasChanged(iMode);
 
     if (!WriteRegSettings())
     {
@@ -189,13 +204,13 @@ void ApplySettings(void)
 static
 void HandleCommand(WORD iControl)
 {
-#define GetChecked() \
-    (SendDlgItemMessage(g_hDlg, iControl, BM_GETCHECK, 0L, 0L) == BST_CHECKED)
-
+#define GetComboIndex() \
+    (BYTE)SendDlgItemMessage(g_hDlg, iControl, CB_GETCURSEL, 0L, 0L)
+	
     switch (iControl)
     {
     case IDC_SM_10DLG_MODE:
-        g_newSettings.bMode = GetChecked();
+        g_newSettings.iMode = GetComboIndex();
         break;
 
     default:
@@ -204,7 +219,7 @@ void HandleCommand(WORD iControl)
 
     EnableApply();
 
-#undef GetChecked
+#undef GetComboIndex
 }
 
 INT_PTR CALLBACK AnimationsDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)

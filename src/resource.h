@@ -49,6 +49,7 @@
 /* Start Menu Dialogs */
 #define IDC_SM_10DLG  114
 #define IDC_SM_10DLG_MODE  115
+#define IDC_SM_OK_BUTTON  116
 
 /* Strings */
 

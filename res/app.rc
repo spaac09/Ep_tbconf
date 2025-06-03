@@ -15,11 +15,11 @@
 
 #undef APSTUDIO_READONLY_SYMBOLS
 
-#define DIALOG_FONTNAME "Segoe UI"
-#define DIALOG_FONTSIZE 9
+#define DIALOG_FONTNAME "MS Shell Dlg"
+#define DIALOG_FONTSIZE 8
 
-#define PAGE_WIDTH 230
-#define PAGE_HEIGHT 240
+#define PAGE_WIDTH 252
+#define PAGE_HEIGHT 236
 
 /* Style definitions */
 

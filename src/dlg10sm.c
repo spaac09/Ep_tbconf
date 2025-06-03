@@ -212,7 +212,11 @@ void HandleCommand(WORD iControl)
     case IDC_SM_10DLG_MODE:
         g_newSettings.iMode = GetComboIndex();
         break;
-
+		
+	case IDC_SM_OK_BUTTON:
+		EndDialog(g_hDlg, iControl);
+		break;
+			
     default:
         return;
     }
@@ -230,13 +234,14 @@ INT_PTR CALLBACK AnimationsDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
         g_hDlg = hWnd;
         InitPage();
         return 0;
-
+		
     case WM_COMMAND:
         switch HIWORD(wParam)
         {
         case BN_CLICKED:
             HandleCommand(LOWORD(wParam));
             break;
+			
         }
 
         return 0;
@@ -254,6 +259,7 @@ INT_PTR CALLBACK AnimationsDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
             return TRUE;
 
         }
+
 
         return 0;
     }

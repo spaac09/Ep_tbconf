@@ -70,4 +70,8 @@
 #define IDS_TB_MMMAIN     208
 #define IDS_TB_MMCUR      209
 
+#define IDS_SM_10DLG_MODE_DEFAULT  210
+#define IDS_SM_10DLG_MODE_ROUNDED  211
+#define IDS_SM_10DLG_MODE_FLOATING  212
+
 #endif  /* !defined(RESOURCE_H) */

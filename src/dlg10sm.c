@@ -24,7 +24,7 @@ static const TCHAR g_explorerPatcherKey[] =
 	
 typedef struct tagTBSETTINGS
 {
-    BOOL iMode;
+    int iMode;
 
 } TBSETTINGS;
 
@@ -46,14 +46,14 @@ void InitComboBoxes(void)
         SendDlgItemMessage(g_hDlg, iControl, CB_ADDSTRING, 0L, (LPARAM)&text); \
     }
 
-    InitCombo(IDC_SM_10DLG_MODE, IDS_TB_POS_L, 4);
+    InitCombo(IDC_SM_10DLG_MODE, IDS_SM_10DLG_MODE_DEFAULT, 3);
 
 #undef InitCombo
 }
 
 
 _Success_(return)
-/*static
+static
 void LoadRegSettings(void)
 {
     HKEY hKey;
@@ -88,18 +88,19 @@ void LoadRegSettings(void)
 #undef ReadInvertedBool
 #undef ReadInt
 #undef ReadDword
-}*/
+}
 
 static
 void LoadDefaultSettings(void)
 {
-    g_oldSettings.iMode = FALSE;
+    g_oldSettings.iMode = 0;
 }
 
 
 static
 void LoadSettings(void)
 {
+    LoadRegSettings();
     LoadDefaultSettings();
 
     g_newSettings = g_oldSettings;
@@ -226,6 +227,27 @@ void HandleCommand(WORD iControl)
 #undef GetComboIndex
 }
 
+static
+void HandleComboBoxSelChange(WORD iControl)
+{
+#define GetComboIndex() \
+    (BYTE)SendDlgItemMessage(g_hDlg, iControl, CB_GETCURSEL, 0L, 0L)
+
+    switch (iControl)
+    {
+    case IDC_SM_10DLG_MODE:
+        g_newSettings.iMode = GetComboIndex();
+        break;
+
+    default:
+        return;
+    }
+
+    EnableApply();
+
+#undef GetComboIndex
+}
+
 INT_PTR CALLBACK AnimationsDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
@@ -242,6 +264,9 @@ INT_PTR CALLBACK AnimationsDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
             HandleCommand(LOWORD(wParam));
             break;
 			
+        case CBN_SELCHANGE:
+            HandleComboBoxSelChange(LOWORD(wParam));
+            break;			
         }
 
         return 0;

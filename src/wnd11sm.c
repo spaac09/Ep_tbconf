@@ -241,11 +241,11 @@ void HandleCommand(WORD iControl)
 
     switch (iControl)
     {
-    case IDC_SM_11STARTMENU_CUSTOMIZE:
+    /*case IDC_SM_11STARTMENU_CUSTOMIZE:
         ShellExecute(NULL, TEXT("open"), TEXT("explorer.exe"),
             TEXT("shell:::{05d7b0f4-2121-4eff-bf6b-ed3f69b894d9}"),
             NULL, SW_SHOWNORMAL);
-        return;
+        return;*/
 		
     case IDC_SM_10STARTMENU_CUSTOMIZE:
         DialogBoxParam(
@@ -253,11 +253,11 @@ void HandleCommand(WORD iControl)
             g_hDlg, AnimationsDlgProc, (LPARAM)&g_explorerPatcherKey);
 		break;	
 		
-    case IDC_SM_STARTSCREEN_CUSTOMIZE:
+    /*case IDC_SM_STARTSCREEN_CUSTOMIZE:
         ShellExecute(NULL, TEXT("open"), TEXT("explorer.exe"),
             TEXT("shell:::{05d7b0f4-2121-4eff-bf6b-ed3f69b894d9}"),
             NULL, SW_SHOWNORMAL);
-        return;		
+        return;		*/
 		
     case IDC_SM_11STARTMENU:
         g_newSettings.b11StartMenu = GetChecked();

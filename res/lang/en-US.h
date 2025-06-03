@@ -59,5 +59,9 @@
 #define S_TB_MMMAIN     "Main taskbar and taskbar where the window is open"
 #define S_TB_MMCUR      "Taskbar where the window is open"
 
+#define S_SM_10DLG_MODE_DEFAULT      "Default look"
+#define S_SM_10DLG_MODE_ROUNDED      "Rounded corners"
+#define S_SM_10DLG_MODE_FLOATING      "Rounded corners, floating menu"
+
 #include "template.rc"
 #include "undef.h"

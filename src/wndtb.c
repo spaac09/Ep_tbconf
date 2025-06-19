@@ -12,6 +12,7 @@
 #include <commctrl.h>
 #include <shellapi.h>
 #include <shlwapi.h>
+#include <stdlib.h>
 
 #define EnableApply() \
     SendMessage(g_propSheet.hWnd, PSM_CHANGED, (WPARAM)g_hDlg, 0L)
@@ -581,7 +582,17 @@ INT_PTR CALLBACK GeneralPageProc(
         case PSN_KILLACTIVE:
             SetWindowLongPtr(hWnd, DWLP_MSGRESULT, (LONG_PTR)FALSE);
             return TRUE;
+			
+        case NM_CLICK:
+        case NM_RETURN:
+			if (lstrcmpW(((NMLINK *)lParam)->item.szID, L"helplink") == 0)
+			ShellExecute(NULL, TEXT("open"), TEXT("cmd.exe"),
+				TEXT("/c START https://github.com/valinet/ExplorerPatcher/wiki/ExplorerPatcher's-taskbar-implementation"),
+				NULL, SW_SHOWNORMAL);
+			break;
         }
+   
+
 
         return 0;
 

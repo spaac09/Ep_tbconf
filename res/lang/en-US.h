@@ -58,6 +58,7 @@
 #define S_TB_MMALL      "All taskbars"
 #define S_TB_MMMAIN     "Main taskbar and taskbar where the window is open"
 #define S_TB_MMCUR      "Taskbar where the window is open"
+#define S_TB_HELPLINK	"<A ID=""helplink"">How do I customize taskbars?</A>"
 
 #define S_SM_10DLG_MODE_DEFAULT      "Default look"
 #define S_SM_10DLG_MODE_ROUNDED      "Rounded corners"

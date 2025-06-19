@@ -474,8 +474,8 @@ void HandleCommand(WORD iControl)
     switch (iControl)
     {
     case IDC_TB_TRAYWND:
-        ShellExecute(NULL, TEXT("open"), TEXT("explorer.exe"),
-            TEXT("shell:::{05d7b0f4-2121-4eff-bf6b-ed3f69b894d9}"),
+        ShellExecute(NULL, TEXT("open"), TEXT("control.exe"),
+            TEXT("/name Microsoft.NotificationAreaIcons"),
             NULL, SW_SHOWNORMAL);
         return;
 

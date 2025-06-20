@@ -31,6 +31,8 @@
 
 #define S_SM_10DLG  "Customize Start Menu"
 
+#define S_NA  "Notification Area"
+
 #define S_ADV  "Advanced"
 
 #define S_ADV_PERFORMANCE     "Performance"

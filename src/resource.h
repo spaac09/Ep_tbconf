@@ -9,9 +9,10 @@
 
 /* Dialogs */
 #define IDD_TB    10
-#define IDD_10SM    20
-#define IDD_11SM    21
-#define IDD_ADV   30
+#define IDD_10SM  20
+#define IDD_11SM  21
+#define IDD_NA    30
+#define IDD_ADV   40
 
 /* Controls */
 

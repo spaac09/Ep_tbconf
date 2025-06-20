@@ -25,6 +25,7 @@ OBJ =\
 	src/wndtb.obj\
 	src/wnd10sm.obj\
 	src/wnd11sm.obj\
+	src/wndna.obj\
 	src/wndadv.obj\
 	src/dlg10sm.obj\
 

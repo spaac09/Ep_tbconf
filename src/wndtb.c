@@ -222,11 +222,11 @@ void UpdateControls(void)
     UpdateExplorerControls();
     UpdateStuckRectsControls();
 }
-
+/*
 static
 void DisableRestrictedControls(void)
 {
-    /* "Lock the Taskbar" policy */
+    
     if (SHRegGetBoolValueFromHKCUHKLM(g_policiesKey, TEXT("LockTaskbar"),
         FALSE))
     {
@@ -235,7 +235,7 @@ void DisableRestrictedControls(void)
         EnableWindow(GetDlgItem(g_hDlg, IDC_TB_LOCK), FALSE);
     }
 
-    /* "Prevent grouping of taskbar items" policy */
+    
     if (SHRegGetBoolValueFromHKCUHKLM(g_policiesKey, TEXT("NoTaskGrouping"),
         FALSE))
     {
@@ -244,13 +244,13 @@ void DisableRestrictedControls(void)
         EnableWindow(GetDlgItem(g_hDlg, IDC_TB_COMBINEBUTTONS), FALSE);
     }
 }
-
+*/
 static
 void InitPage(void)
 {
     InitComboBoxes();
     LoadSettings();
-    DisableRestrictedControls();
+    /*DisableRestrictedControls();*/
     UpdateControls();
 }
 

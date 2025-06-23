@@ -18,12 +18,7 @@
     <ClCompile Include="..\src\main.c" />
     <ClCompile Include="..\src\mincrt.c" />
     <ClCompile Include="..\src\util.c" />
-    <ClCompile Include="..\src\wndtb.c" />
-    <ClCompile Include="..\src\wnd10sm.c" />
-	<ClCompile Include="..\src\wnd11sm.c" />
-	<ClCompile Include="..\src\dlg10sm.c" />
-	<ClCompile Include="..\src\wndna.c" />	
-	<ClCompile Include="..\src\wndadv.c" />
+    <ClCompile Include="..\src\pages.c" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\res\app.rc" />

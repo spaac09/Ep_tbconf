@@ -32,6 +32,8 @@
 #define S_SM_10DLG  "Customize Start Menu"
 
 #define S_NA  "Notification Area"
+#define S_NA_ICON  "Icons"
+#define S_NA_ICON_TEXT "You can keep the notification area uncluttered by hiding icons that you have not clicked recently."
 
 #define S_ADV  "Advanced"
 

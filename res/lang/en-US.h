@@ -34,6 +34,8 @@
 #define S_NA  "Notification Area"
 #define S_NA_ICON  "Icons"
 #define S_NA_ICON_TEXT "You can keep the notification area uncluttered by hiding icons that you have not clicked recently."
+#define S_NA_SYSICON  "System icons"
+#define S_NA_WIN32BATTERY "Use legacy battery flyout"
 
 #define S_ADV  "Advanced"
 

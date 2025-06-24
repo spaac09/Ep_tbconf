@@ -47,6 +47,7 @@
 
 /* Notification Area page */
 #define IDC_NA_ICON_TEXT 300
+#define IDC_NA_WIN32BATTERY 301
 
 /* Advanced page */
 #define IDC_ADV_ANIMATIONS      400

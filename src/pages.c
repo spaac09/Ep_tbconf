@@ -39,6 +39,9 @@ static const TCHAR g_dwmKey[] =
 
 static const TCHAR g_policiesKey[] =
     TEXT("Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer");
+
+static const TCHAR g_immersiveShellKey[] =
+    TEXT("Software\\Microsoft\\Windows\\CurrentVersion\\ImmersiveShell");
 	
 INT_PTR CALLBACK AnimationsDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -60,6 +63,8 @@ typedef struct tagTBSETTINGS
     BOOL bStartScreen;
 	
     int iMode;
+	
+    BOOL bWin32Battery;
 	
     BOOL bAnimations;
     BOOL bSaveThumbnails;
@@ -115,6 +120,8 @@ void LoadDefaultSettings(void)
     g_oldSettings.bStartScreen = FALSE;
 	
     g_oldSettings.iMode = 0;
+	
+    g_oldSettings.bWin32Battery = FALSE;
 	
     g_oldSettings.bAnimations     = TRUE;
     g_oldSettings.bSaveThumbnails = FALSE;
@@ -194,6 +201,14 @@ void LoadExplorerSettings(void)
         ReadInt(TEXT("TaskbarAutohideOnDoubleClick"), bToggleAutoHide);
         RegCloseKey(hKey);
     }
+	
+	status = RegOpenKeyEx(HKEY_LOCAL_MACHINE, g_immersiveShellKey, 0,
+        KEY_QUERY_VALUE, &hKey);
+    if (status == ERROR_SUCCESS)
+    {
+		ReadInt(TEXT("UseWin32BatteryFlyout"), bWin32Battery);
+        RegCloseKey(hKey);
+    }
 
 
 #undef ReadInvertedBool
@@ -253,6 +268,8 @@ void UpdateExplorerControls(void)
     SetChecked(IDC_SM_STARTSCREEN, g_oldSettings.bStartScreen);
 	
     SetComboIndex(IDC_SM_10DLG, g_oldSettings.iMode);
+
+    SetChecked(IDC_NA_WIN32BATTERY, g_oldSettings.bWin32Battery);
 
     SetChecked(IDC_ADV_ANIMATIONS,     g_oldSettings.bAnimations);
     SetChecked(IDC_ADV_SAVETHUMBNAILS, g_oldSettings.bSaveThumbnails);
@@ -490,6 +507,22 @@ BOOL WriteExplorerSettings(void)
         }
     }
 	
+	if (HasChanged(bWin32Battery))
+    {
+        status = RegCreateKeyEx(HKEY_LOCAL_MACHINE, g_immersiveShellKey, 0, NULL,
+            0, KEY_SET_VALUE, NULL, &hKey, NULL);
+        if (status == ERROR_SUCCESS)
+        {
+            UpdateDword(TEXT("UseWin32BatteryFlyout"), bWin32Battery);
+            RegCloseKey(hKey);
+        }
+        else
+        {
+            RestoreSetting(bWin32Battery);
+            ret = FALSE;
+        }
+    }
+	
     if (HasChanged(bSaveThumbnails))
     {
         status = RegCreateKeyEx(HKEY_CURRENT_USER, g_dwmKey, 0, NULL,
@@ -543,7 +576,7 @@ void ApplyExplorerSettings(void)
         HasChanged(bBadges) || HasChanged(iCombineButtons) ||
         HasChanged(bPeek) || HasChanged(bAllDisplays) ||
         HasChanged(iMmDisplays) || HasChanged(iMmCombineButtons) || HasChanged(b10StartMenu) ||
-        HasChanged(b11StartMenu) || HasChanged(bStartScreen) || HasChanged(iMode) ||  HasChanged(bAnimations) || HasChanged(bWinXPowerShell) ||
+        HasChanged(b11StartMenu) || HasChanged(bStartScreen) || HasChanged(iMode) || HasChanged(bWin32Battery) || HasChanged(bAnimations) || HasChanged(bWinXPowerShell) ||
         HasChanged(bShowDesktop)) ;
 
     BOOL bExplorerSettingsChanged = bSendSettingChange || HasChanged(bLock);
@@ -758,7 +791,10 @@ void HandleCommand(WORD iControl)
 	case IDC_SM_OK_BUTTON:
 		EndDialog(g_hDlg, iControl);
 		break;
-		
+	
+    case IDC_NA_WIN32BATTERY:
+        g_newSettings.bWin32Battery = GetChecked();
+        break;
 		
     case IDC_ADV_ANIMATIONS:
         g_newSettings.bAnimations = GetChecked();

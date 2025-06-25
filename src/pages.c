@@ -202,7 +202,7 @@ void LoadExplorerSettings(void)
         RegCloseKey(hKey);
     }
 	
-	status = RegOpenKeyEx(HKEY_LOCAL_MACHINE, g_immersiveShellKey, 0,
+	status = RegOpenKeyEx(HKEY_CURRENT_USER, g_immersiveShellKey, 0,
         KEY_QUERY_VALUE, &hKey);
     if (status == ERROR_SUCCESS)
     {
@@ -509,7 +509,7 @@ BOOL WriteExplorerSettings(void)
 	
 	if (HasChanged(bWin32Battery))
     {
-        status = RegCreateKeyEx(HKEY_LOCAL_MACHINE, g_immersiveShellKey, 0, NULL,
+        status = RegCreateKeyEx(HKEY_CURRENT_USER, g_immersiveShellKey, 0, NULL,
             0, KEY_SET_VALUE, NULL, &hKey, NULL);
         if (status == ERROR_SUCCESS)
         {

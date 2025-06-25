@@ -43,8 +43,12 @@ static const TCHAR g_policiesKey[] =
 static const TCHAR g_immersiveShellKey[] =
     TEXT("Software\\Microsoft\\Windows\\CurrentVersion\\ImmersiveShell");
 	
-INT_PTR CALLBACK AnimationsDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+static const TCHAR g_soundFlyoutKey[] =
+    TEXT("Software\\Microsoft\\Windows NT\\CurrentVersion\\MTCUVC");
 
+INT_PTR CALLBACK StartMenu10DlgProc(
+	HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	
 typedef struct tagTBSETTINGS
 {
     BOOL bLock;
@@ -65,6 +69,7 @@ typedef struct tagTBSETTINGS
     int iMode;
 	
     BOOL bWin32Battery;
+    BOOL bWin32Sound;
 	
     BOOL bAnimations;
     BOOL bSaveThumbnails;
@@ -122,6 +127,7 @@ void LoadDefaultSettings(void)
     g_oldSettings.iMode = 0;
 	
     g_oldSettings.bWin32Battery = FALSE;
+    g_oldSettings.bWin32Sound = FALSE;
 	
     g_oldSettings.bAnimations     = TRUE;
     g_oldSettings.bSaveThumbnails = FALSE;
@@ -209,6 +215,14 @@ void LoadExplorerSettings(void)
 		ReadInt(TEXT("UseWin32BatteryFlyout"), bWin32Battery);
         RegCloseKey(hKey);
     }
+	
+	status = RegOpenKeyEx(HKEY_CURRENT_USER, g_soundFlyoutKey, 0,
+        KEY_QUERY_VALUE, &hKey);
+    if (status == ERROR_SUCCESS)
+    {
+		ReadInvertedBool(TEXT("EnableMtcUvc"), bWin32Sound);
+        RegCloseKey(hKey);
+    }
 
 
 #undef ReadInvertedBool
@@ -270,6 +284,7 @@ void UpdateExplorerControls(void)
     SetComboIndex(IDC_SM_10DLG, g_oldSettings.iMode);
 
     SetChecked(IDC_NA_WIN32BATTERY, g_oldSettings.bWin32Battery);
+    SetChecked(IDC_NA_WIN32SOUND, g_oldSettings.bWin32Sound);
 
     SetChecked(IDC_ADV_ANIMATIONS,     g_oldSettings.bAnimations);
     SetChecked(IDC_ADV_SAVETHUMBNAILS, g_oldSettings.bSaveThumbnails);
@@ -523,6 +538,22 @@ BOOL WriteExplorerSettings(void)
         }
     }
 	
+	if (HasChanged(bWin32Sound))
+    {
+        status = RegCreateKeyEx(HKEY_CURRENT_USER, g_soundFlyoutKey, 0, NULL,
+            0, KEY_SET_VALUE, NULL, &hKey, NULL);
+        if (status == ERROR_SUCCESS)
+        {
+            UpdateDwordInverted(TEXT("EnableMtcUvc"), bWin32Sound);
+            RegCloseKey(hKey);
+        }
+        else
+        {
+            RestoreSetting(bWin32Sound);
+            ret = FALSE;
+        }
+    }
+	
     if (HasChanged(bSaveThumbnails))
     {
         status = RegCreateKeyEx(HKEY_CURRENT_USER, g_dwmKey, 0, NULL,
@@ -576,7 +607,7 @@ void ApplyExplorerSettings(void)
         HasChanged(bBadges) || HasChanged(iCombineButtons) ||
         HasChanged(bPeek) || HasChanged(bAllDisplays) ||
         HasChanged(iMmDisplays) || HasChanged(iMmCombineButtons) || HasChanged(b10StartMenu) ||
-        HasChanged(b11StartMenu) || HasChanged(bStartScreen) || HasChanged(iMode) || HasChanged(bWin32Battery) || HasChanged(bAnimations) || HasChanged(bWinXPowerShell) ||
+        HasChanged(b11StartMenu) || HasChanged(bStartScreen) || HasChanged(iMode) || HasChanged(bWin32Battery) || HasChanged(bWin32Sound) || HasChanged(bAnimations) || HasChanged(bWinXPowerShell) ||
         HasChanged(bShowDesktop)) ;
 
     BOOL bExplorerSettingsChanged = bSendSettingChange || HasChanged(bLock);
@@ -768,7 +799,7 @@ void HandleCommand(WORD iControl)
 	case IDC_SM_10STARTMENU_CUSTOMIZE:
         DialogBoxParam(
             g_propSheet.hInstance, MAKEINTRESOURCE(IDC_SM_10DLG),
-            g_hDlg, AnimationsDlgProc, (LPARAM)&g_explorerPatcherKey);
+            g_hDlg, StartMenu10DlgProc, (LPARAM)&g_explorerPatcherKey);
 		break;	
 		
     case IDC_SM_11STARTMENU:
@@ -794,6 +825,10 @@ void HandleCommand(WORD iControl)
 	
     case IDC_NA_WIN32BATTERY:
         g_newSettings.bWin32Battery = GetChecked();
+        break;
+		
+    case IDC_NA_WIN32SOUND:
+        g_newSettings.bWin32Sound = GetChecked();
         break;
 		
     case IDC_ADV_ANIMATIONS:
@@ -1012,7 +1047,7 @@ INT_PTR CALLBACK StartMenu11PageProc(
 }
 
 
-INT_PTR CALLBACK AnimationsDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK StartMenu10DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
     {

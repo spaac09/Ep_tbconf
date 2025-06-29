@@ -69,7 +69,11 @@
 
 #define S_SM_10DLG_MODE_DEFAULT      "Default look"
 #define S_SM_10DLG_MODE_ROUNDED      "Rounded corners"
-#define S_SM_10DLG_MODE_FLOATING      "Rounded corners, floating menu"
+#define S_SM_10DLG_MODE_FLOATING     "Rounded corners, floating menu"
+
+#define S_NA_CLOCK_WIN32      "Windows 7"
+#define S_NA_CLOCK_10         "Windows 10"
+#define S_NA_CLOCK_ACTION     "Action Center"
 
 #include "template.rc"
 #include "undef.h"

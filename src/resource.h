@@ -49,6 +49,7 @@
 #define IDC_NA_ICON_TEXT 300
 #define IDC_NA_WIN32BATTERY 301
 #define IDC_NA_WIN32SOUND 302
+#define IDC_NA_CLOCK 303
 
 /* Advanced page */
 #define IDC_ADV_ANIMATIONS      400
@@ -79,5 +80,9 @@
 #define IDS_SM_10DLG_MODE_DEFAULT  510
 #define IDS_SM_10DLG_MODE_ROUNDED  511
 #define IDS_SM_10DLG_MODE_FLOATING  512
+
+#define IDC_NA_CLOCK_WIN32 303
+#define IDC_NA_CLOCK_10 304
+#define IDC_NA_CLOCK_ACTION 305
 
 #endif  /* !defined(RESOURCE_H) */

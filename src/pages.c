@@ -12,7 +12,6 @@
 #include <commctrl.h>
 #include <shellapi.h>
 #include <shlwapi.h>
-#include <stdlib.h>
 #include <psapi.h>
 
 #define EnableApply() \
@@ -70,6 +69,7 @@ typedef struct tagTBSETTINGS
 	
     BOOL bWin32Battery;
     BOOL bWin32Sound;
+    int iClock;
 	
     BOOL bAnimations;
     BOOL bSaveThumbnails;
@@ -102,6 +102,8 @@ void InitComboBoxes(void)
     InitCombo(IDC_TB_MMCOMBINEBUTTONS, IDS_TB_COMB_YES, 3);
 	
 	InitCombo(IDC_SM_10DLG_MODE, IDS_SM_10DLG_MODE_DEFAULT, 3);
+	
+	InitCombo(IDC_NA_CLOCK, IDC_NA_CLOCK_WIN32, 3);
 
 #undef InitCombo
 }
@@ -128,7 +130,8 @@ void LoadDefaultSettings(void)
 	
     g_oldSettings.bWin32Battery = FALSE;
     g_oldSettings.bWin32Sound = FALSE;
-	
+	g_oldSettings.iClock = 0;
+
     g_oldSettings.bAnimations     = TRUE;
     g_oldSettings.bSaveThumbnails = FALSE;
     g_oldSettings.bWinXPowerShell = FALSE;  /* TRUE starting from 1703 */
@@ -213,6 +216,7 @@ void LoadExplorerSettings(void)
     if (status == ERROR_SUCCESS)
     {
 		ReadInt(TEXT("UseWin32BatteryFlyout"), bWin32Battery);
+		ReadInt(TEXT("UseWin32TrayClockExperience"), iClock);
         RegCloseKey(hKey);
     }
 	
@@ -285,6 +289,7 @@ void UpdateExplorerControls(void)
 
     SetChecked(IDC_NA_WIN32BATTERY, g_oldSettings.bWin32Battery);
     SetChecked(IDC_NA_WIN32SOUND, g_oldSettings.bWin32Sound);
+    SetComboIndex(IDC_NA_CLOCK, g_oldSettings.iClock);
 
     SetChecked(IDC_ADV_ANIMATIONS,     g_oldSettings.bAnimations);
     SetChecked(IDC_ADV_SAVETHUMBNAILS, g_oldSettings.bSaveThumbnails);
@@ -522,18 +527,20 @@ BOOL WriteExplorerSettings(void)
         }
     }
 	
-	if (HasChanged(bWin32Battery))
+	if (HasChanged(bWin32Battery) || HasChanged(iClock))
     {
         status = RegCreateKeyEx(HKEY_CURRENT_USER, g_immersiveShellKey, 0, NULL,
             0, KEY_SET_VALUE, NULL, &hKey, NULL);
         if (status == ERROR_SUCCESS)
         {
             UpdateDword(TEXT("UseWin32BatteryFlyout"), bWin32Battery);
+            UpdateDword(TEXT("UseWin32TrayClockExperience"), iClock);
             RegCloseKey(hKey);
         }
         else
         {
             RestoreSetting(bWin32Battery);
+            RestoreSetting(iClock);
             ret = FALSE;
         }
     }
@@ -607,7 +614,7 @@ void ApplyExplorerSettings(void)
         HasChanged(bBadges) || HasChanged(iCombineButtons) ||
         HasChanged(bPeek) || HasChanged(bAllDisplays) ||
         HasChanged(iMmDisplays) || HasChanged(iMmCombineButtons) || HasChanged(b10StartMenu) ||
-        HasChanged(b11StartMenu) || HasChanged(bStartScreen) || HasChanged(iMode) || HasChanged(bWin32Battery) || HasChanged(bWin32Sound) || HasChanged(bAnimations) || HasChanged(bWinXPowerShell) ||
+        HasChanged(b11StartMenu) || HasChanged(bStartScreen) || HasChanged(iMode) || HasChanged(bWin32Battery) || HasChanged(iClock) || HasChanged(bWin32Sound) || HasChanged(bAnimations) || HasChanged(bWinXPowerShell) ||
         HasChanged(bShowDesktop)) ;
 
     BOOL bExplorerSettingsChanged = bSendSettingChange || HasChanged(bLock);
@@ -794,8 +801,7 @@ void HandleCommand(WORD iControl)
     case IDC_TB_ALLDISPLAYS:
         g_newSettings.bAllDisplays = GetChecked();
         break;
-		
-		
+
 	case IDC_SM_10STARTMENU_CUSTOMIZE:
         DialogBoxParam(
             g_propSheet.hInstance, MAKEINTRESOURCE(IDC_SM_10DLG),
@@ -812,11 +818,6 @@ void HandleCommand(WORD iControl)
 
     case IDC_SM_STARTSCREEN:
         g_newSettings.bStartScreen = GetChecked();
-        break;
-		
-		
-    case IDC_SM_10DLG_MODE:
-        g_newSettings.iMode = GetComboIndex();
         break;
 		
 	case IDC_SM_OK_BUTTON:
@@ -883,10 +884,13 @@ void HandleComboBoxSelChange(WORD iControl)
     case IDC_TB_MMCOMBINEBUTTONS:
         g_newSettings.iMmCombineButtons = GetComboIndex();
         break;
-
 		
     case IDC_SM_10DLG_MODE:
         g_newSettings.iMode = GetComboIndex();
+        break;
+		
+    case IDC_NA_CLOCK:
+        g_newSettings.iClock = GetComboIndex();
         break;		
 
     default:
@@ -942,8 +946,6 @@ INT_PTR CALLBACK GeneralPageProc(
 				NULL, SW_SHOWNORMAL);
 			break;
         }
-   
-
 
         return 0;
 
@@ -1070,6 +1072,10 @@ INT_PTR CALLBACK StartMenu10DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 
         return 0;
 
+	case WM_CLOSE:
+		EndDialog(g_hDlg, uMsg);
+		return 0;
+	
     case WM_NOTIFY:
         switch (((NMHDR *)lParam)->code)
         {
@@ -1091,6 +1097,46 @@ INT_PTR CALLBACK StartMenu10DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
     return 0;
 }
 
+
+INT_PTR CALLBACK NotificationPageProc(
+    HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    switch (uMsg)
+    {
+    case WM_INITDIALOG:
+        g_hDlg = hWnd;
+        InitPage();
+        return 0;
+
+    case WM_COMMAND:
+        switch HIWORD(wParam)
+        {
+        case BN_CLICKED:
+            HandleCommand(LOWORD(wParam));
+            break;
+        }
+
+        return 0;
+
+    case WM_NOTIFY:
+        switch (((NMHDR *)lParam)->code)
+        {
+        case PSN_APPLY:
+            ApplySettings();
+            SetWindowLongPtr(hWnd, DWLP_MSGRESULT, (LONG_PTR)PSNRET_NOERROR);
+            return TRUE;
+
+        case PSN_KILLACTIVE:
+            SetWindowLongPtr(hWnd, DWLP_MSGRESULT, (LONG_PTR)FALSE);
+            return TRUE;
+
+        }
+
+        return 0;
+    }
+
+    return 0;
+}
 
 
 INT_PTR CALLBACK AdvancedPageProc(
@@ -1130,48 +1176,6 @@ INT_PTR CALLBACK AdvancedPageProc(
             if (lstrcmpW(((NMLINK *)lParam)->item.szID, L"restart") == 0)
                 RestartExplorer();
             break;
-        }
-
-        return 0;
-    }
-
-    return 0;
-}
-
-
-
-INT_PTR CALLBACK NotificationPageProc(
-    HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-    switch (uMsg)
-    {
-    case WM_INITDIALOG:
-        g_hDlg = hWnd;
-        InitPage();
-        return 0;
-
-    case WM_COMMAND:
-        switch HIWORD(wParam)
-        {
-        case BN_CLICKED:
-            HandleCommand(LOWORD(wParam));
-            break;
-        }
-
-        return 0;
-
-    case WM_NOTIFY:
-        switch (((NMHDR *)lParam)->code)
-        {
-        case PSN_APPLY:
-            ApplySettings();
-            SetWindowLongPtr(hWnd, DWLP_MSGRESULT, (LONG_PTR)PSNRET_NOERROR);
-            return TRUE;
-
-        case PSN_KILLACTIVE:
-            SetWindowLongPtr(hWnd, DWLP_MSGRESULT, (LONG_PTR)FALSE);
-            return TRUE;
-
         }
 
         return 0;

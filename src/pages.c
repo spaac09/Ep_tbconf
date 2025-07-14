@@ -44,6 +44,9 @@ static const TCHAR g_immersiveShellKey[] =
 	
 static const TCHAR g_soundFlyoutKey[] =
     TEXT("Software\\Microsoft\\Windows NT\\CurrentVersion\\MTCUVC");
+	
+static const TCHAR g_networkFlyoutKey[] =
+    TEXT("Software\\Microsoft\\Windows\\CurrentVersion\\Control Panel\\Settings\\Network");
 
 INT_PTR CALLBACK StartMenu10DlgProc(
 	HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -70,6 +73,7 @@ typedef struct tagTBSETTINGS
     BOOL bWin32Battery;
     BOOL bWin32Sound;
     int iClock;
+    int iNetwork;
 	
     BOOL bAnimations;
     BOOL bSaveThumbnails;
@@ -103,7 +107,8 @@ void InitComboBoxes(void)
 	
 	InitCombo(IDC_SM_10DLG_MODE, IDS_SM_10DLG_MODE_DEFAULT, 3);
 	
-	InitCombo(IDC_NA_CLOCK, IDC_NA_CLOCK_WIN32, 3);
+	InitCombo(IDC_NA_CLOCK, IDS_NA_CLOCK_10, 3);
+	InitCombo(IDC_NA_NETWORK, IDS_NA_NETWORK_10, 5);
 
 #undef InitCombo
 }
@@ -131,7 +136,8 @@ void LoadDefaultSettings(void)
     g_oldSettings.bWin32Battery = FALSE;
     g_oldSettings.bWin32Sound = FALSE;
 	g_oldSettings.iClock = 0;
-
+	g_oldSettings.iNetwork = 0;
+	
     g_oldSettings.bAnimations     = TRUE;
     g_oldSettings.bSaveThumbnails = FALSE;
     g_oldSettings.bWinXPowerShell = FALSE;  /* TRUE starting from 1703 */
@@ -227,6 +233,14 @@ void LoadExplorerSettings(void)
 		ReadInvertedBool(TEXT("EnableMtcUvc"), bWin32Sound);
         RegCloseKey(hKey);
     }
+	
+	status = RegOpenKeyEx(HKEY_CURRENT_USER, g_networkFlyoutKey, 0,
+        KEY_QUERY_VALUE, &hKey);
+    if (status == ERROR_SUCCESS)
+    {
+		ReadInt(TEXT("ReplaceVan"), iNetwork);
+        RegCloseKey(hKey);
+    }
 
 
 #undef ReadInvertedBool
@@ -290,6 +304,7 @@ void UpdateExplorerControls(void)
     SetChecked(IDC_NA_WIN32BATTERY, g_oldSettings.bWin32Battery);
     SetChecked(IDC_NA_WIN32SOUND, g_oldSettings.bWin32Sound);
     SetComboIndex(IDC_NA_CLOCK, g_oldSettings.iClock);
+    SetComboIndex(IDC_NA_NETWORK, g_oldSettings.iNetwork);
 
     SetChecked(IDC_ADV_ANIMATIONS,     g_oldSettings.bAnimations);
     SetChecked(IDC_ADV_SAVETHUMBNAILS, g_oldSettings.bSaveThumbnails);
@@ -561,6 +576,22 @@ BOOL WriteExplorerSettings(void)
         }
     }
 	
+	if (HasChanged(iNetwork))
+    {
+        status = RegCreateKeyEx(HKEY_CURRENT_USER, g_networkFlyoutKey, 0, NULL,
+            0, KEY_SET_VALUE, NULL, &hKey, NULL);
+        if (status == ERROR_SUCCESS)
+        {
+            UpdateDwordInverted(TEXT("ReplaceVan"), iNetwork);
+            RegCloseKey(hKey);
+        }
+        else
+        {
+            RestoreSetting(iNetwork);
+            ret = FALSE;
+        }
+    }
+	
     if (HasChanged(bSaveThumbnails))
     {
         status = RegCreateKeyEx(HKEY_CURRENT_USER, g_dwmKey, 0, NULL,
@@ -614,7 +645,7 @@ void ApplyExplorerSettings(void)
         HasChanged(bBadges) || HasChanged(iCombineButtons) ||
         HasChanged(bPeek) || HasChanged(bAllDisplays) ||
         HasChanged(iMmDisplays) || HasChanged(iMmCombineButtons) || HasChanged(b10StartMenu) ||
-        HasChanged(b11StartMenu) || HasChanged(bStartScreen) || HasChanged(iMode) || HasChanged(bWin32Battery) || HasChanged(iClock) || HasChanged(bWin32Sound) || HasChanged(bAnimations) || HasChanged(bWinXPowerShell) ||
+        HasChanged(b11StartMenu) || HasChanged(bStartScreen) || HasChanged(iMode) || HasChanged(bWin32Battery) || HasChanged(iClock) || HasChanged(iNetwork) || HasChanged(bWin32Sound) || HasChanged(bAnimations) || HasChanged(bWinXPowerShell) ||
         HasChanged(bShowDesktop)) ;
 
     BOOL bExplorerSettingsChanged = bSendSettingChange || HasChanged(bLock);
@@ -891,6 +922,10 @@ void HandleComboBoxSelChange(WORD iControl)
 		
     case IDC_NA_CLOCK:
         g_newSettings.iClock = GetComboIndex();
+        break;	
+		
+    case IDC_NA_NETWORK:
+        g_newSettings.iNetwork = GetComboIndex();
         break;		
 
     default:

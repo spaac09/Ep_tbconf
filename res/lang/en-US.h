@@ -37,6 +37,8 @@
 #define S_NA_SYSICON  "System icons"
 #define S_NA_WIN32BATTERY "Use legacy battery flyout"
 #define S_NA_WIN32SOUND "Use legacy sound flyout"
+#define S_NA_CLOCK_TEXT "Clock flyout:"
+#define S_NA_NETWORK_TEXT "Network flyout:"
 
 #define S_ADV  "Advanced"
 
@@ -74,6 +76,12 @@
 #define S_NA_CLOCK_WIN32      "Windows 7"
 #define S_NA_CLOCK_10         "Windows 10"
 #define S_NA_CLOCK_ACTION     "Action Center"
+
+#define S_NA_NETWORK_10			"Windows 10"
+#define S_NA_NETWORK_8			"Windows 8"
+#define S_NA_NETWORK_SETTINGS	"Network section in the Settings app"
+#define S_NA_NETWORK_NETCENTER	"Network and Sharing Center in Control Panel"
+#define S_NA_NETWORK_NETCON		"Network Connections in Control Panel"
 
 #include "template.rc"
 #include "undef.h"

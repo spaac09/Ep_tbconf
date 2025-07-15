@@ -72,8 +72,9 @@ typedef struct tagTBSETTINGS
 	
     BOOL bWin32Battery;
     BOOL bWin32Sound;
-    int iClock;
-    int iNetwork;
+    int  iClock;
+    int  iNetwork;
+	BOOL bUserTile;
 	
     BOOL bAnimations;
     BOOL bSaveThumbnails;
@@ -137,7 +138,8 @@ void LoadDefaultSettings(void)
     g_oldSettings.bWin32Sound = FALSE;
 	g_oldSettings.iClock = 0;
 	g_oldSettings.iNetwork = 0;
-	
+    g_oldSettings.bUserTile = FALSE;
+
     g_oldSettings.bAnimations     = TRUE;
     g_oldSettings.bSaveThumbnails = FALSE;
     g_oldSettings.bWinXPowerShell = FALSE;  /* TRUE starting from 1703 */
@@ -214,6 +216,9 @@ void LoadExplorerSettings(void)
 		ReadInvertedBool(TEXT("UseImmersiveLauncher"), b10StartMenu);
 		
         ReadInt(TEXT("TaskbarAutohideOnDoubleClick"), bToggleAutoHide);
+		
+		ReadInt(TEXT("ShowUserTile"), bUserTile);
+
         RegCloseKey(hKey);
     }
 	
@@ -305,7 +310,8 @@ void UpdateExplorerControls(void)
     SetChecked(IDC_NA_WIN32SOUND, g_oldSettings.bWin32Sound);
     SetComboIndex(IDC_NA_CLOCK, g_oldSettings.iClock);
     SetComboIndex(IDC_NA_NETWORK, g_oldSettings.iNetwork);
-
+    SetChecked(IDC_NA_USERTILE, g_oldSettings.bUserTile);
+	
     SetChecked(IDC_ADV_ANIMATIONS,     g_oldSettings.bAnimations);
     SetChecked(IDC_ADV_SAVETHUMBNAILS, g_oldSettings.bSaveThumbnails);
     SetChecked(IDC_ADV_WINXPOWERSHELL, g_oldSettings.bWinXPowerShell);
@@ -526,18 +532,20 @@ BOOL WriteExplorerSettings(void)
         }
     }
 
-    if (HasChanged(iMode))
+    if (HasChanged(iMode) || HasChanged(bUserTile))
     {
         status = RegCreateKeyEx(HKEY_CURRENT_USER, g_explorerPatcherKey, 0, NULL,
             0, KEY_SET_VALUE, NULL, &hKey, NULL);
         if (status == ERROR_SUCCESS)
         {
             UpdateDword(TEXT("StartUI_EnableRoundedCorners"), iMode);
+            UpdateDword(TEXT("ShowUserTile"), bUserTile);
             RegCloseKey(hKey);
         }
         else
         {
             RestoreSetting(iMode);
+			RestoreSetting(bUserTile);
             ret = FALSE;
         }
     }
@@ -582,7 +590,7 @@ BOOL WriteExplorerSettings(void)
             0, KEY_SET_VALUE, NULL, &hKey, NULL);
         if (status == ERROR_SUCCESS)
         {
-            UpdateDwordInverted(TEXT("ReplaceVan"), iNetwork);
+            UpdateDword(TEXT("ReplaceVan"), iNetwork);
             RegCloseKey(hKey);
         }
         else
@@ -645,7 +653,7 @@ void ApplyExplorerSettings(void)
         HasChanged(bBadges) || HasChanged(iCombineButtons) ||
         HasChanged(bPeek) || HasChanged(bAllDisplays) ||
         HasChanged(iMmDisplays) || HasChanged(iMmCombineButtons) || HasChanged(b10StartMenu) ||
-        HasChanged(b11StartMenu) || HasChanged(bStartScreen) || HasChanged(iMode) || HasChanged(bWin32Battery) || HasChanged(iClock) || HasChanged(iNetwork) || HasChanged(bWin32Sound) || HasChanged(bAnimations) || HasChanged(bWinXPowerShell) ||
+        HasChanged(b11StartMenu) || HasChanged(bStartScreen) || HasChanged(iMode) || HasChanged(bWin32Battery) || HasChanged(iClock) || HasChanged(iNetwork) || HasChanged(bUserTile) || HasChanged(bWin32Sound) || HasChanged(bAnimations) || HasChanged(bWinXPowerShell) ||
         HasChanged(bShowDesktop)) ;
 
     BOOL bExplorerSettingsChanged = bSendSettingChange || HasChanged(bLock);
@@ -861,6 +869,10 @@ void HandleCommand(WORD iControl)
 		
     case IDC_NA_WIN32SOUND:
         g_newSettings.bWin32Sound = GetChecked();
+        break;
+		
+    case IDC_NA_USERTILE:
+        g_newSettings.bUserTile = GetChecked();
         break;
 		
     case IDC_ADV_ANIMATIONS:

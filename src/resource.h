@@ -53,6 +53,7 @@
 #define IDC_NA_CLOCK_TEXT 304
 #define IDC_NA_NETWORK 305
 #define IDC_NA_NETWORK_TEXT 306
+#define IDC_NA_USERTILE 307
 
 /* Advanced page */
 #define IDC_ADV_ANIMATIONS      400

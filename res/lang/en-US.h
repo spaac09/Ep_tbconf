@@ -39,6 +39,7 @@
 #define S_NA_WIN32SOUND "Use legacy sound flyout"
 #define S_NA_CLOCK_TEXT "Clock flyout:"
 #define S_NA_NETWORK_TEXT "Network flyout:"
+#define S_NA_USERTILE "Show user tile"
 
 #define S_ADV  "Advanced"
 

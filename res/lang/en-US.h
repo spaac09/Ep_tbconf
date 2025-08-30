@@ -51,7 +51,7 @@
 #define S_ADV_WINXPOWERSHELL  "Replace Command Prompt with &PowerShell in the menu when right-clicking the start button or pressing Windows+X *"
 
 #define S_ADV_MISC            "Miscellaneous"
-#define S_ADV_SHOWDESKTOP     "Enable Show &Desktop button **"
+#define S_ADV_SHOWDESKTOP     "Enable Show &Desktop button"
 #define S_ADV_TOGGLEAUTOHIDE  "Toggle &hiding the taskbar when double clicking it **"
 
 #define S_ADV_RESTARTEXPLORER_T  "* Requires restarting Explorer after applying to take effect"

@@ -70,6 +70,11 @@
 #define S_TB_MMCUR      "Taskbar where the window is open"
 #define S_TB_HELPLINK	"<A ID=""helplink"">How do I customize taskbars?</A>"
 
+#define S_SM_PRIVACY	"Privacy"
+#define S_SM_TRACKPROGS	"Store and display recently opened &programs in the Start menu"
+#define S_SM_TRACKDOCS	"Store and display recently opened items in the Start &menu and the taskbar"
+#define S_SM_HELPLINK	"<A ID=""helplink"">How do I change the way the Start menu looks?</A>"
+
 #define S_SM_10DLG_MODE_DEFAULT      "Default look"
 #define S_SM_10DLG_MODE_ROUNDED      "Rounded corners"
 #define S_SM_10DLG_MODE_FLOATING     "Rounded corners, floating menu"

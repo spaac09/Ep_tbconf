@@ -67,6 +67,8 @@ typedef struct tagTBSETTINGS
     BOOL b10StartMenu;
     BOOL b11StartMenu;
     BOOL bStartScreen;
+    BOOL bTrackProgs;
+    BOOL bTrackDocs;
 	
     int iMode;
 	
@@ -131,6 +133,8 @@ void LoadDefaultSettings(void)
     g_oldSettings.b10StartMenu = FALSE;
     g_oldSettings.b11StartMenu = TRUE;
     g_oldSettings.bStartScreen = FALSE;
+    g_oldSettings.bTrackProgs = TRUE;
+    g_oldSettings.bTrackDocs = TRUE;
 	
     g_oldSettings.iMode = 0;
 	
@@ -187,6 +191,8 @@ void LoadExplorerSettings(void)
 
 		ReadInt(TEXT("Start_ShowClassicMode"), b10StartMenu);
 		ReadInvertedBool(TEXT("Start_ShowClassicMode"), b11StartMenu);
+		ReadInt(TEXT("Start_TrackProgs"), bTrackProgs);
+		ReadInt(TEXT("Start_TrackDocs"), bTrackDocs);
 		
 		ReadInt(TEXT("StartUI_EnableRoundedCorners"), iMode);
 		
@@ -303,6 +309,8 @@ void UpdateExplorerControls(void)
     SetChecked(IDC_SM_11STARTMENU,     g_oldSettings.b11StartMenu);
     SetChecked(IDC_SM_10STARTMENU,    g_oldSettings.b10StartMenu);
     SetChecked(IDC_SM_STARTSCREEN, g_oldSettings.bStartScreen);
+    SetChecked(IDC_SM_TRACKPROGS, g_oldSettings.bTrackProgs);
+    SetChecked(IDC_SM_TRACKDOCS, g_oldSettings.bTrackDocs);
 	
     SetComboIndex(IDC_SM_10DLG, g_oldSettings.iMode);
 
@@ -429,6 +437,8 @@ BOOL WriteExplorerSettings(void)
         RestoreSetting(bAllDisplays);
         RestoreSetting(iMmDisplays);
         RestoreSetting(iMmCombineButtons);
+		RestoreSetting(bTrackProgs);
+		RestoreSetting(bTrackDocs);
         return FALSE;
     }
 
@@ -468,6 +478,8 @@ BOOL WriteExplorerSettings(void)
     UpdateDword(TEXT("MMTaskbarMode"), iMmDisplays);
     UpdateDword(TEXT("MMTaskbarGlomLevel"), iMmCombineButtons);
     UpdateDword(TEXT("EnableAeroPeek"), bPeek);
+	UpdateDword(TEXT("Start_TrackProgs"), bTrackProgs);
+	UpdateDword(TEXT("Start_TrackDocs"), bTrackDocs);
 	
 	   if (HasChanged(b10StartMenu) || HasChanged(b11StartMenu))
     {
@@ -653,7 +665,7 @@ void ApplyExplorerSettings(void)
         HasChanged(bBadges) || HasChanged(iCombineButtons) ||
         HasChanged(bPeek) || HasChanged(bAllDisplays) ||
         HasChanged(iMmDisplays) || HasChanged(iMmCombineButtons) || HasChanged(b10StartMenu) ||
-        HasChanged(b11StartMenu) || HasChanged(bStartScreen) || HasChanged(iMode) || HasChanged(bWin32Battery) || HasChanged(iClock) || HasChanged(iNetwork) || HasChanged(bUserTile) || HasChanged(bWin32Sound) || HasChanged(bAnimations) || HasChanged(bWinXPowerShell) ||
+        HasChanged(b11StartMenu) || HasChanged(bStartScreen) || HasChanged(bTrackProgs) || HasChanged(bTrackDocs) || HasChanged(iMode) || HasChanged(bWin32Battery) || HasChanged(iClock) || HasChanged(iNetwork) || HasChanged(bUserTile) || HasChanged(bWin32Sound) || HasChanged(bAnimations) || HasChanged(bWinXPowerShell) ||
         HasChanged(bShowDesktop)) ;
 
     BOOL bExplorerSettingsChanged = bSendSettingChange || HasChanged(bLock);
@@ -859,6 +871,14 @@ void HandleCommand(WORD iControl)
         g_newSettings.bStartScreen = GetChecked();
         break;
 		
+    case IDC_SM_TRACKPROGS:
+        g_newSettings.bTrackProgs = GetChecked();
+        break;
+		
+    case IDC_SM_TRACKDOCS:
+        g_newSettings.bTrackDocs = GetChecked();
+        break;
+		
 	case IDC_SM_OK_BUTTON:
 		EndDialog(g_hDlg, iControl);
 		break;
@@ -989,7 +1009,7 @@ INT_PTR CALLBACK GeneralPageProc(
         case NM_RETURN:
 			if (lstrcmpW(((NMLINK *)lParam)->item.szID, L"helplink") == 0)
 			ShellExecute(NULL, TEXT("open"), TEXT("cmd.exe"),
-				TEXT("/c START https://github.com/valinet/ExplorerPatcher/wiki/ExplorerPatcher's-taskbar-implementation"),
+				TEXT("/c START https://github.com/spaac09/Ep_tbconf"),
 				NULL, SW_SHOWNORMAL);
 			break;
         }
@@ -1045,7 +1065,14 @@ INT_PTR CALLBACK StartMenu10PageProc(
         case PSN_KILLACTIVE:
             SetWindowLongPtr(hWnd, DWLP_MSGRESULT, (LONG_PTR)FALSE);
             return TRUE;
-
+			
+        case NM_CLICK:
+        case NM_RETURN:
+			if (lstrcmpW(((NMLINK *)lParam)->item.szID, L"helplink") == 0)
+			ShellExecute(NULL, TEXT("open"), TEXT("cmd.exe"),
+				TEXT("/c START https://github.com/spaac09/Ep_tbconf"),
+				NULL, SW_SHOWNORMAL);
+			break;
         }
 
         return 0;
@@ -1086,7 +1113,14 @@ INT_PTR CALLBACK StartMenu11PageProc(
         case PSN_KILLACTIVE:
             SetWindowLongPtr(hWnd, DWLP_MSGRESULT, (LONG_PTR)FALSE);
             return TRUE;
-
+			
+        case NM_CLICK:
+        case NM_RETURN:
+			if (lstrcmpW(((NMLINK *)lParam)->item.szID, L"helplink") == 0)
+			ShellExecute(NULL, TEXT("open"), TEXT("cmd.exe"),
+				TEXT("/c START https://github.com/spaac09/Ep_tbconf"),
+				NULL, SW_SHOWNORMAL);
+			break;
         }
 
         return 0;

@@ -1008,9 +1008,9 @@ INT_PTR CALLBACK GeneralPageProc(
         case NM_CLICK:
         case NM_RETURN:
 			if (lstrcmpW(((NMLINK *)lParam)->item.szID, L"helplink") == 0)
-			ShellExecute(NULL, TEXT("open"), TEXT("cmd.exe"),
-				TEXT("/c START https://github.com/spaac09/Ep_tbconf"),
-				NULL, SW_SHOWNORMAL);
+			ShellExecute(NULL, TEXT("open"),
+				TEXT("https://github.com/spaac09/Ep_tbconf"),
+				NULL, NULL, SW_SHOWNORMAL);
 			break;
         }
 
@@ -1069,9 +1069,9 @@ INT_PTR CALLBACK StartMenu10PageProc(
         case NM_CLICK:
         case NM_RETURN:
 			if (lstrcmpW(((NMLINK *)lParam)->item.szID, L"helplink") == 0)
-			ShellExecute(NULL, TEXT("open"), TEXT("cmd.exe"),
-				TEXT("/c START https://github.com/spaac09/Ep_tbconf"),
-				NULL, SW_SHOWNORMAL);
+			ShellExecute(NULL, TEXT("open"),
+				TEXT("https://github.com/spaac09/Ep_tbconf"),
+				NULL, NULL, SW_SHOWNORMAL);
 			break;
         }
 
@@ -1117,9 +1117,9 @@ INT_PTR CALLBACK StartMenu11PageProc(
         case NM_CLICK:
         case NM_RETURN:
 			if (lstrcmpW(((NMLINK *)lParam)->item.szID, L"helplink") == 0)
-			ShellExecute(NULL, TEXT("open"), TEXT("cmd.exe"),
-				TEXT("/c START https://github.com/spaac09/Ep_tbconf"),
-				NULL, SW_SHOWNORMAL);
+			ShellExecute(NULL, TEXT("open"),
+				TEXT("https://github.com/spaac09/Ep_tbconf"),
+				NULL, NULL, SW_SHOWNORMAL);
 			break;
         }
 

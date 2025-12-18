@@ -18,8 +18,13 @@
 #define DIALOG_FONTNAME "MS Shell Dlg"
 #define DIALOG_FONTSIZE 8
 
+#ifdef BLUEPILL
+#define PAGE_WIDTH 252
+#define PAGE_HEIGHT 218
+#else
 #define PAGE_WIDTH 252
 #define PAGE_HEIGHT 236
+#endif
 
 /* Style definitions */
 

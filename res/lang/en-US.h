@@ -8,7 +8,6 @@
 #define S_TB  "Taskbar"
 #define S_TB_TITLE  "Taskbar and Start Menu"
 
-#define S_TB_TB                 "Taskbar appearance"
 #define S_TB_LOCK               "&Lock the taskbar"
 #define S_TB_AUTOHIDE           "A&uto-hide the taskbar"
 #define S_TB_SMALLBUTTONS       "Us&e small taskbar buttons"
@@ -23,6 +22,14 @@
 #define S_TB_ALLDISPLAYS       "&Show taskbar on all displays"
 #define S_TB_MMDISPLAYS        "S&how buttons on:"
 #define S_TB_MMCOMBINEBUTTONS  "Combine buttons on &other taskbars:"
+
+#define S_TB_TB_7               "Taskbar appearance"
+#define S_TB_SMALLBUTTONS_7		"Use small &icons"
+#define S_TB_NA_7               "Notification area"
+#define S_TB_TRAYWND_7          "Customise which icons and notifications appear in the notification area."
+#define S_TB_PEEKBOX_7          "Preview desktop with Aero Peek"
+#define S_TB_PEEKBOX_TEXT_7     "Temporarily view the desktop when you move your mouse to the Show desktop button at end of the taskbar."
+#define S_TB_PEEK_7             "Use Aero &Peek to preview the desktop"
 
 #define S_SM  "Start Menu"
 
@@ -69,6 +76,7 @@
 #define S_TB_MMMAIN     "Main taskbar and taskbar where the window is open"
 #define S_TB_MMCUR      "Taskbar where the window is open"
 #define S_TB_HELPLINK	"<A ID=""helplink"">How do I customize taskbars?</A>"
+#define S_TB_HELPLINK_7	"<A ID=""helplink"">How do I customize the taskbar?</A>"
 
 #define S_SM_PRIVACY	"Privacy"
 #define S_SM_TRACKPROGS	"Store and display recently opened &programs in the Start menu"
@@ -89,5 +97,11 @@
 #define S_NA_NETWORK_NETCENTER	"Network and Sharing Center in Control Panel"
 #define S_NA_NETWORK_NETCON		"Network Connections in Control Panel"
 
+#ifdef BLUEPILL
+#include "template7.rc"
+#else
 #include "template.rc"
+#endif
+
+
 #include "undef.h"

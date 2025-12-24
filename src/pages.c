@@ -2,7 +2,8 @@
  * COPYRIGHT: See COPYING in the top level directory
  * PURPOSE:   General taskbar property page
  *
- * PROGRAMMER: Franco Tortoriello (torto09@gmail.com)
+ * PROGRAMMERS: SpaofSpaac
+ *              Franco Tortoriello (torto09@gmail.com)
  */
 
 #include "app.h"
@@ -50,7 +51,7 @@ static const TCHAR g_networkFlyoutKey[] =
 
 INT_PTR CALLBACK StartMenu10DlgProc(
 	HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	
+
 typedef struct tagTBSETTINGS
 {
     BOOL bLock;
@@ -69,9 +70,7 @@ typedef struct tagTBSETTINGS
     BOOL bStartScreen;
     BOOL bTrackProgs;
     BOOL bTrackDocs;
-	
-    int iMode;
-	
+
     BOOL bWin32Battery;
     BOOL bWin32Sound;
     int  iClock;
@@ -136,8 +135,6 @@ void LoadDefaultSettings(void)
     g_oldSettings.bTrackProgs = TRUE;
     g_oldSettings.bTrackDocs = TRUE;
 	
-    g_oldSettings.iMode = 0;
-	
     g_oldSettings.bWin32Battery = FALSE;
     g_oldSettings.bWin32Sound = FALSE;
 	g_oldSettings.iClock = 0;
@@ -193,8 +190,6 @@ void LoadExplorerSettings(void)
 		ReadInvertedBool(TEXT("Start_ShowClassicMode"), b11StartMenu);
 		ReadInt(TEXT("Start_TrackProgs"), bTrackProgs);
 		ReadInt(TEXT("Start_TrackDocs"), bTrackDocs);
-		
-		ReadInt(TEXT("StartUI_EnableRoundedCorners"), iMode);
 		
         ReadInt(TEXT("TaskbarAnimations"), bAnimations);
         ReadInvertedBool(TEXT("DontUsePowerShellOnWinX"), bWinXPowerShell);
@@ -311,8 +306,6 @@ void UpdateExplorerControls(void)
     SetChecked(IDC_SM_STARTSCREEN, g_oldSettings.bStartScreen);
     SetChecked(IDC_SM_TRACKPROGS, g_oldSettings.bTrackProgs);
     SetChecked(IDC_SM_TRACKDOCS, g_oldSettings.bTrackDocs);
-	
-    SetComboIndex(IDC_SM_10DLG, g_oldSettings.iMode);
 
     SetChecked(IDC_NA_WIN32BATTERY, g_oldSettings.bWin32Battery);
     SetChecked(IDC_NA_WIN32SOUND, g_oldSettings.bWin32Sound);
@@ -544,19 +537,17 @@ BOOL WriteExplorerSettings(void)
         }
     }
 
-    if (HasChanged(iMode) || HasChanged(bUserTile))
+    if (HasChanged(bUserTile))
     {
         status = RegCreateKeyEx(HKEY_CURRENT_USER, g_explorerPatcherKey, 0, NULL,
             0, KEY_SET_VALUE, NULL, &hKey, NULL);
         if (status == ERROR_SUCCESS)
         {
-            UpdateDword(TEXT("StartUI_EnableRoundedCorners"), iMode);
             UpdateDword(TEXT("ShowUserTile"), bUserTile);
             RegCloseKey(hKey);
         }
         else
         {
-            RestoreSetting(iMode);
 			RestoreSetting(bUserTile);
             ret = FALSE;
         }
@@ -665,7 +656,7 @@ void ApplyExplorerSettings(void)
         HasChanged(bBadges) || HasChanged(iCombineButtons) ||
         HasChanged(bPeek) || HasChanged(bAllDisplays) ||
         HasChanged(iMmDisplays) || HasChanged(iMmCombineButtons) || HasChanged(b10StartMenu) ||
-        HasChanged(b11StartMenu) || HasChanged(bStartScreen) || HasChanged(bTrackProgs) || HasChanged(bTrackDocs) || HasChanged(iMode) || HasChanged(bWin32Battery) || HasChanged(iClock) || HasChanged(iNetwork) || HasChanged(bUserTile) || HasChanged(bWin32Sound) || HasChanged(bAnimations) || HasChanged(bWinXPowerShell) ||
+        HasChanged(b11StartMenu) || HasChanged(bStartScreen) || HasChanged(bTrackProgs) || HasChanged(bTrackDocs) || HasChanged(bWin32Battery) || HasChanged(iClock) || HasChanged(iNetwork) || HasChanged(bUserTile) || HasChanged(bWin32Sound) || HasChanged(bAnimations) || HasChanged(bWinXPowerShell) ||
         HasChanged(bShowDesktop)) ;
 
     BOOL bExplorerSettingsChanged = bSendSettingChange || HasChanged(bLock);
@@ -947,11 +938,7 @@ void HandleComboBoxSelChange(WORD iControl)
     case IDC_TB_MMCOMBINEBUTTONS:
         g_newSettings.iMmCombineButtons = GetComboIndex();
         break;
-		
-    case IDC_SM_10DLG_MODE:
-        g_newSettings.iMode = GetComboIndex();
-        break;
-		
+
     case IDC_NA_CLOCK:
         g_newSettings.iClock = GetComboIndex();
         break;	
@@ -1122,55 +1109,6 @@ INT_PTR CALLBACK StartMenu11PageProc(
 				NULL, NULL, SW_SHOWNORMAL);
 			break;
         }
-
-        return 0;
-    }
-
-    return 0;
-}
-
-
-INT_PTR CALLBACK StartMenu10DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-    switch (uMsg)
-    {
-    case WM_INITDIALOG:
-        g_hDlg = hWnd;
-        InitPage();
-        return 0;
-		
-    case WM_COMMAND:
-        switch HIWORD(wParam)
-        {
-        case BN_CLICKED:
-            HandleCommand(LOWORD(wParam));
-            break;
-			
-        case CBN_SELCHANGE:
-            HandleComboBoxSelChange(LOWORD(wParam));
-            break;			
-        }
-
-        return 0;
-
-	case WM_CLOSE:
-		EndDialog(g_hDlg, uMsg);
-		return 0;
-	
-    case WM_NOTIFY:
-        switch (((NMHDR *)lParam)->code)
-        {
-        case PSN_APPLY:
-            ApplySettings();
-            SetWindowLongPtr(hWnd, DWLP_MSGRESULT, (LONG_PTR)PSNRET_NOERROR);
-            return TRUE;
-
-        case PSN_KILLACTIVE:
-            SetWindowLongPtr(hWnd, DWLP_MSGRESULT, (LONG_PTR)FALSE);
-            return TRUE;
-
-        }
-
 
         return 0;
     }

@@ -35,6 +35,7 @@
 
 #define S_SM_DEFAULTMENU  "Default Start menu"
 #define S_SM_STARTSCREEN  "Windows 8 Start screen"
+#define S_SM_TEXT_7       "To customize how links, icons, and menus look and behave in the Start menu, click Customize."
 
 #define S_SM_10DLG  "Customize Start Menu"
 

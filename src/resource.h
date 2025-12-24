@@ -2,8 +2,8 @@
 #if !defined(RESOURCE_H)
 #define RESOURCE_H
 
-#define VERSION      1,1,3,0
-#define VERSION_STR  "1.1.3\0"
+#define VERSION      2,0,0,0
+#define VERSION_STR  "2.0\0"
 
 #define IDC_STATIC  -1
 
@@ -39,8 +39,9 @@
 #define IDC_SM_11STARTMENU_CUSTOMIZE  206
 #define IDC_SM_10STARTMENU_CUSTOMIZE  207
 #define IDC_SM_STARTSCREEN_CUSTOMIZE  208
-#define IDC_SM_TRACKPROGS  209
-#define IDC_SM_TRACKDOCS  210
+#define IDC_SM_7STARTMENU_CUSTOMIZE  209
+#define IDC_SM_TRACKPROGS  220
+#define IDC_SM_TRACKDOCS  221
 
 /* Start Menu Dialogs */
 #define IDC_SM_10DLG  250

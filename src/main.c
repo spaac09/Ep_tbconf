@@ -2,7 +2,8 @@
  * COPYRIGHT: See COPYING in the top level directory
  * PURPOSE:   Program entry point
  *
- * PROGRAMMER: Franco Tortoriello (torto09@gmail.com)
+ * PROGRAMMERS: SpaofSpaac
+ *              Franco Tortoriello (torto09@gmail.com)
  */
 
 #include "app.h"
@@ -120,12 +121,17 @@ UINT DisplayPropSheet(UINT nStartPage) {
     psh.pfnCallback = PropSheetProc;
 
     InitPage(&psh, IDD_TB, GeneralPageProc);
+	
+	#ifdef BLUEPILL
+	InitPage(&psh, IDD_10SM, StartMenu10PageProc);
+	#else
 	if (BuildNumber() >= 21370) {
 	InitPage(&psh, IDD_11SM, StartMenu11PageProc);
 	}
 	else {
 	InitPage(&psh, IDD_10SM, StartMenu10PageProc);
 	}
+	#endif
 	InitPage(&psh, IDD_NA, NotificationPageProc);
 	InitPage(&psh, IDD_ADV, AdvancedPageProc);
 

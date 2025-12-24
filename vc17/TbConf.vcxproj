@@ -19,6 +19,7 @@
     <ClCompile Include="..\src\mincrt.c" />
     <ClCompile Include="..\src\util.c" />
     <ClCompile Include="..\src\pages.c" />
+    <ClCompile Include="..\src\dialogs.c" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\res\app.rc" />

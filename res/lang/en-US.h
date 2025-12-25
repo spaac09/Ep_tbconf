@@ -38,6 +38,12 @@
 #define S_SM_TEXT_7       "To customize how links, icons, and menus look and behave in the Start menu, click Customize."
 
 #define S_SM_10DLG  "Customize Start Menu"
+#define S_SM_OK_BUTTON "OK"
+#define S_SM_CANCEL_BUTTON "Cancel"
+#define S_SM_DEFAULT_BUTTON "Use &Default Settings"
+
+#define S_SM_7DLG_TEXT "You can customize how links, icons, and menus look and behave on the Start menu."
+#define S_SM_7DLG_MFU "Start menu size"
 
 #define S_NA  "Notification Area"
 #define S_NA_ICON  "Icons"

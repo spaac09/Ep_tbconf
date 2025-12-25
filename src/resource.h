@@ -44,9 +44,14 @@
 #define IDC_SM_TRACKDOCS  221
 
 /* Start Menu Dialogs */
+#define IDC_SM_DEFAULT_BUTTON  247
+#define IDC_SM_OK_BUTTON  248
+#define IDC_SM_CANCEL_BUTTON 249
+
 #define IDC_SM_10DLG  250
 #define IDC_SM_10DLG_MODE  251
-#define IDC_SM_OK_BUTTON  252
+
+#define IDC_SM_7DLG  260
 
 /* Notification Area page */
 #define IDC_NA_ICON_TEXT 300

@@ -51,6 +51,9 @@ static const TCHAR g_networkFlyoutKey[] =
 
 INT_PTR CALLBACK StartMenu10DlgProc(
 	HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	
+INT_PTR CALLBACK StartMenu7DlgProc(
+	HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 typedef struct tagTBSETTINGS
 {
@@ -848,6 +851,12 @@ void HandleCommand(WORD iControl)
         DialogBoxParam(
             g_propSheet.hInstance, MAKEINTRESOURCE(IDC_SM_10DLG),
             g_hDlg, StartMenu10DlgProc, (LPARAM)&g_explorerPatcherKey);
+		break;	
+		
+	case IDC_SM_7STARTMENU_CUSTOMIZE:
+        DialogBoxParam(
+            g_propSheet.hInstance, MAKEINTRESOURCE(IDC_SM_7DLG),
+            g_hDlg, StartMenu7DlgProc, (LPARAM)&g_explorerPatcherKey);
 		break;	
 		
     case IDC_SM_11STARTMENU:

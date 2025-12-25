@@ -216,6 +216,11 @@ void HandleCommand(WORD iControl)
         break;
 		
 	case IDC_SM_OK_BUTTON:
+		ApplySettings();
+		EndDialog(g_hDlg, iControl);
+		break;
+		
+	case IDC_SM_CANCEL_BUTTON:
 		EndDialog(g_hDlg, iControl);
 		break;
 			
@@ -275,20 +280,39 @@ INT_PTR CALLBACK StartMenu10DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 	case WM_CLOSE:
 		EndDialog(g_hDlg, uMsg);
 		return 0;
-	
-    case WM_NOTIFY:
-        switch (((NMHDR *)lParam)->code)
+
+        return 0;
+    }
+
+    return 0;
+}
+
+INT_PTR CALLBACK StartMenu7DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    switch (uMsg)
+    {
+    case WM_INITDIALOG:
+        g_hDlg = hWnd;
+        InitPage();
+        return 0;
+		
+    case WM_COMMAND:
+        switch HIWORD(wParam)
         {
-        case PSN_APPLY:
-            ApplySettings();
-            SetWindowLongPtr(hWnd, DWLP_MSGRESULT, (LONG_PTR)PSNRET_NOERROR);
-            return TRUE;
-
-        case PSN_KILLACTIVE:
-            SetWindowLongPtr(hWnd, DWLP_MSGRESULT, (LONG_PTR)FALSE);
-            return TRUE;
-
+        case BN_CLICKED:
+            HandleCommand(LOWORD(wParam));
+            break;
+			
+        case CBN_SELCHANGE:
+            HandleComboBoxSelChange(LOWORD(wParam));
+            break;			
         }
+
+        return 0;
+
+	case WM_CLOSE:
+		EndDialog(g_hDlg, uMsg);
+		return 0;
 
 
         return 0;

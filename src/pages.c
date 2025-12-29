@@ -851,13 +851,13 @@ void HandleCommand(WORD iControl)
         DialogBoxParam(
             g_propSheet.hInstance, MAKEINTRESOURCE(IDC_SM_10DLG),
             g_hDlg, StartMenu10DlgProc, (LPARAM)&g_explorerPatcherKey);
-		break;	
+        break;
 		
 	case IDC_SM_7STARTMENU_CUSTOMIZE:
         DialogBoxParam(
             g_propSheet.hInstance, MAKEINTRESOURCE(IDC_SM_7DLG),
             g_hDlg, StartMenu7DlgProc, (LPARAM)&g_explorerPatcherKey);
-		break;	
+        break;
 		
     case IDC_SM_11STARTMENU:
         g_newSettings.b11StartMenu = GetChecked();
@@ -878,10 +878,6 @@ void HandleCommand(WORD iControl)
     case IDC_SM_TRACKDOCS:
         g_newSettings.bTrackDocs = GetChecked();
         break;
-		
-	case IDC_SM_OK_BUTTON:
-		EndDialog(g_hDlg, iControl);
-		break;
 	
     case IDC_NA_WIN32BATTERY:
         g_newSettings.bWin32Battery = GetChecked();

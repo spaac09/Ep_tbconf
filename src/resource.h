@@ -45,13 +45,15 @@
 
 /* Start Menu Dialogs */
 #define IDC_SM_DEFAULT_BUTTON  247
-#define IDC_SM_OK_BUTTON  248
-#define IDC_SM_CANCEL_BUTTON 249
 
 #define IDC_SM_10DLG  250
 #define IDC_SM_10DLG_MODE  251
 
 #define IDC_SM_7DLG  260
+#define IDC_SM_MFU_PROGRAMS 261
+#define IDC_SM_MFU_ITEMS 262
+#define IDC_SM_MFU_PROGRAMS_SPIN 263
+#define IDC_SM_MFU_ITEMS_SPIN 264
 
 /* Notification Area page */
 #define IDC_NA_ICON_TEXT 300

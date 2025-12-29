@@ -20,19 +20,40 @@
 #define SetComboIndex(iControl, index) \
     SendDlgItemMessage(g_hDlg, iControl, CB_SETCURSEL, (WPARAM)index, 0L)	
 	
+static const TCHAR g_explorerKey[] =
+    TEXT("Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced");
+	
 static const TCHAR g_explorerPatcherKey[] =
     TEXT("Software\\ExplorerPatcher");
 	
-typedef struct tagTBSETTINGS
+typedef struct tagTBDSETTINGS
 {
+	int iPrograms;
+	int iItems;
     int iMode;
 
-} TBSETTINGS;
+} TBDSETTINGS;
 
-static TBSETTINGS g_oldSettings;
-static TBSETTINGS g_newSettings;
+static TBDSETTINGS g_oldSettings;
+static TBDSETTINGS g_newSettings;
 
 static HWND g_hDlg;
+
+#define UpdateUpDown(iControl, member) \
+    SendDlgItemMessage(g_hDlg, iControl, \
+        UDM_SETPOS, 0L, (LPARAM)member)
+
+static
+void SetRanges(void)
+{
+#define SetRange(iControl, min, max) \
+    SendDlgItemMessage(g_hDlg, iControl, UDM_SETRANGE, 0L, MAKELONG(max, min))
+
+    SetRange(IDC_SM_MFU_PROGRAMS_SPIN, 0, 30);
+    SetRange(IDC_SM_MFU_ITEMS_SPIN, 0, 60);
+
+#undef SetRanges
+}
 
 static
 void InitComboBoxes(void)
@@ -85,6 +106,16 @@ void LoadRegSettings(void)
     ReadInt(TEXT("StartUI_EnableRoundedCorners"), iMode);
 
     RegCloseKey(hKey);
+	
+	status = RegOpenKeyEx(HKEY_CURRENT_USER, g_explorerKey, 0,
+        KEY_QUERY_VALUE, &hKey);
+    if (status != ERROR_SUCCESS)
+        return;
+
+    ReadInt(TEXT("Start_MinMFU"), iPrograms);
+    ReadInt(TEXT("Start_JumpListItems"), iItems);
+
+    RegCloseKey(hKey);
 
 #undef ReadInvertedBool
 #undef ReadInt
@@ -95,14 +126,17 @@ static
 void LoadDefaultSettings(void)
 {
     g_oldSettings.iMode = 0;
+	
+	g_oldSettings.iPrograms = 10;
+	g_oldSettings.iItems = 10;
 }
 
 
 static
 void LoadSettings(void)
 {
+	LoadDefaultSettings();
     LoadRegSettings();
-    LoadDefaultSettings();
 
     g_newSettings = g_oldSettings;
 }
@@ -111,6 +145,9 @@ static
 void UpdateControls(void)
 {
     SetComboIndex(IDC_SM_10DLG, g_oldSettings.iMode);
+	
+	UpdateUpDown(IDC_SM_MFU_PROGRAMS_SPIN, g_oldSettings.iPrograms);
+	UpdateUpDown(IDC_SM_MFU_ITEMS_SPIN, g_oldSettings.iItems);
 
 }
 
@@ -121,6 +158,7 @@ void InitPage(void)
     LoadSettings();
     InitComboBoxes();
 	UpdateControls();
+	SetRanges();
 }
 
 #define HasChanged(member) \
@@ -143,6 +181,7 @@ BOOL WriteRegSettings(void)
 
     BOOL ret = TRUE;
     DWORD dwData;
+	
 
 #define SetDword(valueName) \
     status = RegSetValueEx(hKey, valueName, 0, REG_DWORD, \
@@ -169,6 +208,26 @@ BOOL WriteRegSettings(void)
     }
 
     UpdateDword(TEXT("StartUI_EnableRoundedCorners"), iMode);
+	
+	   if (HasChanged(iPrograms) || HasChanged(iItems))
+    {
+        status = RegCreateKeyEx(HKEY_CURRENT_USER, g_explorerKey, 0, NULL, 0,
+            KEY_SET_VALUE, NULL, &hKey, NULL);
+        if (status == ERROR_SUCCESS)
+        {
+            UpdateDword(TEXT("Start_MinMFU"), iPrograms);
+            UpdateDword(TEXT("Start_JumpListItems"), iItems);
+
+            RegCloseKey(hKey);
+        }
+        else
+        {
+            RestoreSetting(iPrograms);
+            RestoreSetting(iItems);
+            
+            ret = FALSE;
+        }
+    }
 
 #undef UpdateDwordInverted
 #undef UpdateDword
@@ -178,13 +237,12 @@ BOOL WriteRegSettings(void)
 
     return ret;
 
-#undef RestoreSetting
 }
 
 static
 void ApplySettings(void)
 {
-    BOOL bSendSettingChange = HasChanged(iMode);
+    BOOL bSendSettingChange = HasChanged(iMode) || HasChanged(iPrograms) || HasChanged(iItems);
 
     if (!WriteRegSettings())
     {
@@ -203,6 +261,32 @@ void ApplySettings(void)
 
 #undef HasChanged
 
+
+static
+void HandleEditChange(WORD iControl)
+{
+#define GetUdPos(iUd) \
+    (int)LOWORD(SendDlgItemMessage(g_hDlg, iUd, UDM_GETPOS, 0L, 0L))
+
+    switch (iControl)
+    {
+    case IDC_SM_MFU_PROGRAMS_SPIN:
+        g_newSettings.iPrograms = GetUdPos(IDC_SM_MFU_PROGRAMS_SPIN);
+        break;
+
+    case IDC_SM_MFU_ITEMS_SPIN:
+        g_newSettings.iItems = GetUdPos(IDC_SM_MFU_ITEMS_SPIN);
+        break;
+
+    default:
+        return;
+    }
+
+#undef GetUdPos
+
+    EnableApply();
+}
+
 static
 void HandleCommand(WORD iControl)
 {
@@ -215,14 +299,18 @@ void HandleCommand(WORD iControl)
         g_newSettings.iMode = GetComboIndex();
         break;
 		
-	case IDC_SM_OK_BUTTON:
-		ApplySettings();
-		EndDialog(g_hDlg, iControl);
-		break;
+    case IDOK:
+        EndDialog(g_hDlg, iControl);
+        break;
 		
-	case IDC_SM_CANCEL_BUTTON:
-		EndDialog(g_hDlg, iControl);
-		break;
+    case IDCANCEL:
+        EndDialog(g_hDlg, iControl);
+        break;
+		
+	case IDC_SM_DEFAULT_BUTTON: 
+        RestoreSetting(iPrograms);
+        RestoreSetting(iItems);
+        break;
 			
     default:
         return;
@@ -281,7 +369,6 @@ INT_PTR CALLBACK StartMenu10DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 		EndDialog(g_hDlg, uMsg);
 		return 0;
 
-        return 0;
     }
 
     return 0;
@@ -314,8 +401,6 @@ INT_PTR CALLBACK StartMenu7DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 		EndDialog(g_hDlg, uMsg);
 		return 0;
 
-
-        return 0;
     }
 
     return 0;

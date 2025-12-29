@@ -44,6 +44,8 @@
 
 #define S_SM_7DLG_TEXT "You can customize how links, icons, and menus look and behave on the Start menu."
 #define S_SM_7DLG_MFU "Start menu size"
+#define S_SM_MFU_PROGRAMS "&Number of recent programs to display:"
+#define S_SM_MFU_ITEMS "Number of recent items to display in &Jump Lists:"
 
 #define S_NA  "Notification Area"
 #define S_NA_ICON  "Icons"

@@ -31,6 +31,8 @@ typedef struct tagTBDSETTINGS
 	int iPrograms;
 	int iItems;
     int iMode;
+	int Start_TrackProgs;
+	int Start_TrackDocs;
 
 } TBDSETTINGS;
 
@@ -116,11 +118,48 @@ void LoadRegSettings(void)
     ReadInt(TEXT("Start_JumpListItems"), iItems);
 
     RegCloseKey(hKey);
+}
+
+void ProgramItemDisableCheck(void) {
+	/* Disables controls if Start_TrackProgs/Start_TrackDocs is 0 */
+	HKEY hKey;
+    DWORD dwType;
+    DWORD dwData = 0;
+    DWORD dwSize;
+	
+	LSTATUS status = RegOpenKeyEx(HKEY_CURRENT_USER, g_explorerKey, 0,
+        KEY_QUERY_VALUE, &hKey);
+    if (status != ERROR_SUCCESS)
+        return;
+	
+	int Start_TrackProgs = 0;
+	int Start_TrackDocs = 0;
+	
+    ReadDword(TEXT("Start_TrackProgs")); 
+    if (status == ERROR_SUCCESS && dwType == REG_DWORD)
+	Start_TrackProgs = (int)dwData;
+	
+	ReadDword(TEXT("Start_TrackDocs"));
+	if (status == ERROR_SUCCESS && dwType == REG_DWORD)
+	Start_TrackDocs = (int)dwData;
+
+	if (Start_TrackProgs == 0){
+		EnableWindow(GetDlgItem(g_hDlg,IDC_SM_MFU_PROGRAMS),FALSE);
+		EnableWindow(GetDlgItem(g_hDlg,IDC_SM_MFU_PROGRAMS_SPIN),FALSE);
+
+	}
+	
+	if (Start_TrackDocs == 0){
+		EnableWindow(GetDlgItem(g_hDlg,IDC_SM_MFU_ITEMS),FALSE);
+		EnableWindow(GetDlgItem(g_hDlg,IDC_SM_MFU_PROGRAMS_SPIN),FALSE);
+	}
+	RegCloseKey(hKey);
+
+}	
 
 #undef ReadInvertedBool
 #undef ReadInt
 #undef ReadDword
-}
 
 static
 void LoadDefaultSettings(void)
@@ -137,6 +176,7 @@ void LoadSettings(void)
 {
 	LoadDefaultSettings();
     LoadRegSettings();
+	ProgramItemDisableCheck();
 
     g_newSettings = g_oldSettings;
 }
@@ -171,7 +211,7 @@ BOOL WriteRegSettings(void)
     g_newSettings.member = g_oldSettings.member
 
     HKEY hKey;
-    LSTATUS status = RegCreateKeyEx(HKEY_CURRENT_USER, g_explorerPatcherKey, 0, NULL, 0,
+    LSTATUS status = RegCreateKeyEx(HKEY_CURRENT_USER, g_explorerKey, 0, NULL, 0,
         KEY_SET_VALUE, NULL, &hKey, NULL);
     if (status != ERROR_SUCCESS)
     {

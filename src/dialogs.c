@@ -132,8 +132,8 @@ void ProgramItemDisableCheck(void) {
     if (status != ERROR_SUCCESS)
         return;
 	
-	int Start_TrackProgs = 0;
-	int Start_TrackDocs = 0;
+	int Start_TrackProgs = 1;
+	int Start_TrackDocs = 1;
 	
     ReadDword(TEXT("Start_TrackProgs")); 
     if (status == ERROR_SUCCESS && dwType == REG_DWORD)
@@ -201,6 +201,8 @@ void InitPage(void)
 	SetRanges();
 }
 
+int DefaultSet = 0;
+
 #define HasChanged(member) \
     (g_newSettings.member != g_oldSettings.member)
 
@@ -228,7 +230,7 @@ BOOL WriteRegSettings(void)
         (BYTE *)&dwData, sizeof(DWORD))
 
 #define UpdateDword(valueName, member) \
-    if (HasChanged(member)) { \
+		if (HasChanged(member) || DefaultSet == 1) { \
         dwData = (DWORD)g_newSettings.member; \
         SetDword(valueName); \
         if (status != ERROR_SUCCESS) { \
@@ -238,7 +240,7 @@ BOOL WriteRegSettings(void)
     }
 
 #define UpdateDwordInverted(valueName, member) \
-    if (HasChanged(member)) { \
+		if (HasChanged(member) || DefaultSet == 1) { \
         dwData = (DWORD)!g_newSettings.member; \
         SetDword(valueName); \
         if (status != ERROR_SUCCESS) { \
@@ -248,9 +250,7 @@ BOOL WriteRegSettings(void)
     }
 
     UpdateDword(TEXT("StartUI_EnableRoundedCorners"), iMode);
-	
-	   if (HasChanged(iPrograms) || HasChanged(iItems))
-    {
+
         status = RegCreateKeyEx(HKEY_CURRENT_USER, g_explorerKey, 0, NULL, 0,
             KEY_SET_VALUE, NULL, &hKey, NULL);
         if (status == ERROR_SUCCESS)
@@ -258,7 +258,6 @@ BOOL WriteRegSettings(void)
             UpdateDword(TEXT("Start_MinMFU"), iPrograms);
             UpdateDword(TEXT("Start_JumpListItems"), iItems);
 
-            RegCloseKey(hKey);
         }
         else
         {
@@ -267,8 +266,7 @@ BOOL WriteRegSettings(void)
             
             ret = FALSE;
         }
-    }
-
+	
 #undef UpdateDwordInverted
 #undef UpdateDword
 #undef SetDword
@@ -282,8 +280,6 @@ BOOL WriteRegSettings(void)
 static
 void ApplySettings(void)
 {
-    BOOL bSendSettingChange = HasChanged(iMode) || HasChanged(iPrograms) || HasChanged(iItems);
-
     if (!WriteRegSettings())
     {
         /* An error has ocurred, show previous settings */
@@ -292,46 +288,25 @@ void ApplySettings(void)
 
     g_oldSettings = g_newSettings;
 
-    if (bSendSettingChange)
-    {
         SendNotifyMessage(HWND_BROADCAST, WM_SETTINGCHANGE,
             0L, (LPARAM)TEXT("TraySettings"));
-    }
+    
 }
 
 #undef HasChanged
 
 
-static
-void HandleEditChange(WORD iControl)
-{
-#define GetUdPos(iUd) \
-    (int)LOWORD(SendDlgItemMessage(g_hDlg, iUd, UDM_GETPOS, 0L, 0L))
 
-    switch (iControl)
-    {
-    case IDC_SM_MFU_PROGRAMS_SPIN:
-        g_newSettings.iPrograms = GetUdPos(IDC_SM_MFU_PROGRAMS_SPIN);
-        break;
-
-    case IDC_SM_MFU_ITEMS_SPIN:
-        g_newSettings.iItems = GetUdPos(IDC_SM_MFU_ITEMS_SPIN);
-        break;
-
-    default:
-        return;
-    }
-
-#undef GetUdPos
-
-    EnableApply();
-}
 
 static
 void HandleCommand(WORD iControl)
 {
 #define GetComboIndex() \
     (BYTE)SendDlgItemMessage(g_hDlg, iControl, CB_GETCURSEL, 0L, 0L)
+#define GetChecked() \
+    (SendDlgItemMessage(g_hDlg, iControl, BM_GETCHECK, 0L, 0L) == BST_CHECKED)
+#define GetUdPos(iUd) \
+    (int)LOWORD(SendDlgItemMessage(g_hDlg, iUd, UDM_GETPOS, 0L, 0L))
 	
     switch (iControl)
     {
@@ -340,18 +315,24 @@ void HandleCommand(WORD iControl)
         break;
 		
     case IDOK:
-        EndDialog(g_hDlg, iControl);
-        break;
-		
-    case IDCANCEL:
-        EndDialog(g_hDlg, iControl);
+		g_newSettings.iPrograms = GetUdPos(IDC_SM_MFU_PROGRAMS_SPIN);
+        g_newSettings.iItems = GetUdPos(IDC_SM_MFU_ITEMS_SPIN);
+		ApplySettings();
+		EndDialog(g_hDlg, iControl);
         break;
 		
 	case IDC_SM_DEFAULT_BUTTON: 
-        RestoreSetting(iPrograms);
-        RestoreSetting(iItems);
+		LoadDefaultSettings();
+		UpdateControls();
+        DefaultSet = 1;
         break;
-			
+		
+    case IDCANCEL:
+        g_newSettings = g_oldSettings;
+        EndDialog(g_hDlg, iControl);
+        break;
+		
+		
     default:
         return;
     }
@@ -429,12 +410,11 @@ INT_PTR CALLBACK StartMenu7DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
         case BN_CLICKED:
             HandleCommand(LOWORD(wParam));
             break;
-			
+	
         case CBN_SELCHANGE:
             HandleComboBoxSelChange(LOWORD(wParam));
-            break;			
+            break;
         }
-
         return 0;
 
 	case WM_CLOSE:

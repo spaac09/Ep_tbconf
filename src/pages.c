@@ -71,6 +71,7 @@ typedef struct tagTBSETTINGS
     BOOL b10StartMenu;
     BOOL b11StartMenu;
     BOOL bStartScreen;
+    int  iPowerOptions;
     BOOL bTrackProgs;
     BOOL bTrackDocs;
 
@@ -110,7 +111,7 @@ void InitComboBoxes(void)
     InitCombo(IDC_TB_MMDISPLAYS, IDS_TB_MMALL, 3);
     InitCombo(IDC_TB_MMCOMBINEBUTTONS, IDS_TB_COMB_YES, 3);
 	
-	InitCombo(IDC_SM_10DLG_MODE, IDS_SM_10DLG_MODE_DEFAULT, 3);
+	InitCombo(IDC_SM_POWEROPTIONS, IDS_SM_POWEROPTIONS_SWITCH, 6);
 	
 	InitCombo(IDC_NA_CLOCK, IDS_NA_CLOCK_10, 3);
 	InitCombo(IDC_NA_NETWORK, IDS_NA_NETWORK_10, 5);
@@ -135,6 +136,7 @@ void LoadDefaultSettings(void)
     g_oldSettings.b10StartMenu = FALSE;
     g_oldSettings.b11StartMenu = TRUE;
     g_oldSettings.bStartScreen = FALSE;
+    g_oldSettings.iPowerOptions = 2;
     g_oldSettings.bTrackProgs = TRUE;
     g_oldSettings.bTrackDocs = TRUE;
 	
@@ -191,6 +193,29 @@ void LoadExplorerSettings(void)
 
 		ReadInt(TEXT("Start_ShowClassicMode"), b10StartMenu);
 		ReadInvertedBool(TEXT("Start_ShowClassicMode"), b11StartMenu);
+		
+		ReadDword(TEXT("Start_PowerButtonAction"));
+		if (status == ERROR_SUCCESS && dwType == REG_DWORD) {
+			if (dwData == 256) {
+				g_oldSettings.iPowerOptions = 0; // Switch User
+			}
+			else if (dwData == 1) {
+				g_oldSettings.iPowerOptions = 1; // Log off
+			}
+			else if (dwData == 512) {
+				g_oldSettings.iPowerOptions = 2; // Lock
+			}
+			else if (dwData == 4) {
+				g_oldSettings.iPowerOptions = 3; // Restart
+			}
+			else if (dwData == 16) {
+				g_oldSettings.iPowerOptions = 4; // Sleep
+			}
+			else {
+				g_oldSettings.iPowerOptions = 5; // Shut down
+			}
+		}
+		
 		ReadInt(TEXT("Start_TrackProgs"), bTrackProgs);
 		ReadInt(TEXT("Start_TrackDocs"), bTrackDocs);
 		
@@ -307,6 +332,8 @@ void UpdateExplorerControls(void)
     SetChecked(IDC_SM_11STARTMENU,     g_oldSettings.b11StartMenu);
     SetChecked(IDC_SM_10STARTMENU,    g_oldSettings.b10StartMenu);
     SetChecked(IDC_SM_STARTSCREEN, g_oldSettings.bStartScreen);
+	
+    SetComboIndex(IDC_SM_POWEROPTIONS, g_oldSettings.iPowerOptions);
     SetChecked(IDC_SM_TRACKPROGS, g_oldSettings.bTrackProgs);
     SetChecked(IDC_SM_TRACKDOCS, g_oldSettings.bTrackDocs);
 
@@ -433,6 +460,7 @@ BOOL WriteExplorerSettings(void)
         RestoreSetting(bAllDisplays);
         RestoreSetting(iMmDisplays);
         RestoreSetting(iMmCombineButtons);
+        RestoreSetting(iPowerOptions);
 		RestoreSetting(bTrackProgs);
 		RestoreSetting(bTrackDocs);
         return FALSE;
@@ -474,6 +502,31 @@ BOOL WriteExplorerSettings(void)
     UpdateDword(TEXT("MMTaskbarMode"), iMmDisplays);
     UpdateDword(TEXT("MMTaskbarGlomLevel"), iMmCombineButtons);
     UpdateDword(TEXT("EnableAeroPeek"), bPeek);
+	
+		if (g_newSettings.iPowerOptions == 0) {
+			dwData = 256; // Switch User
+		}
+		else if (g_newSettings.iPowerOptions == 1) {
+			dwData = 1; // Log off
+		}
+		else if (g_newSettings.iPowerOptions == 2) {
+			dwData = 512; // Lock
+			}
+		else if (g_newSettings.iPowerOptions == 3) {
+			dwData = 4; // Restart
+		}
+		else if (g_newSettings.iPowerOptions == 4) {
+			dwData = 16; // Sleep
+		}
+		else {
+			dwData = 2; // Shut down
+		}
+		SetDword(TEXT("Start_PowerButtonAction"));
+		if (status != ERROR_SUCCESS) {
+            RestoreSetting(iPowerOptions); 
+            ret = FALSE; 
+        } 
+		
 	UpdateDword(TEXT("Start_TrackProgs"), bTrackProgs);
 	UpdateDword(TEXT("Start_TrackDocs"), bTrackDocs);
 	
@@ -659,7 +712,7 @@ void ApplyExplorerSettings(void)
         HasChanged(bBadges) || HasChanged(iCombineButtons) ||
         HasChanged(bPeek) || HasChanged(bAllDisplays) ||
         HasChanged(iMmDisplays) || HasChanged(iMmCombineButtons) || HasChanged(b10StartMenu) ||
-        HasChanged(b11StartMenu) || HasChanged(bStartScreen) || HasChanged(bTrackProgs) || HasChanged(bTrackDocs) || HasChanged(bWin32Battery) || HasChanged(iClock) || HasChanged(iNetwork) || HasChanged(bUserTile) || HasChanged(bWin32Sound) || HasChanged(bAnimations) || HasChanged(bWinXPowerShell) ||
+        HasChanged(b11StartMenu) || HasChanged(bStartScreen) || HasChanged(iPowerOptions) || HasChanged(bTrackProgs) || HasChanged(bTrackDocs) || HasChanged(bWin32Battery) || HasChanged(iClock) || HasChanged(iNetwork) || HasChanged(bUserTile) || HasChanged(bWin32Sound) || HasChanged(bAnimations) || HasChanged(bWinXPowerShell) ||
         HasChanged(bShowDesktop)) ;
 
     BOOL bExplorerSettingsChanged = bSendSettingChange || HasChanged(bLock);
@@ -943,6 +996,10 @@ void HandleComboBoxSelChange(WORD iControl)
     case IDC_TB_MMCOMBINEBUTTONS:
         g_newSettings.iMmCombineButtons = GetComboIndex();
         break;
+		
+    case IDC_SM_POWEROPTIONS:
+        g_newSettings.iPowerOptions = GetComboIndex();
+        break;
 
     case IDC_NA_CLOCK:
         g_newSettings.iClock = GetComboIndex();
@@ -1042,6 +1099,11 @@ INT_PTR CALLBACK StartMenu10PageProc(
         case BN_CLICKED:
             HandleCommand(LOWORD(wParam));
             break;
+			
+        case CBN_SELCHANGE:
+            HandleComboBoxSelChange(LOWORD(wParam));
+            break;
+        
         }
 
         return 0;
@@ -1089,6 +1151,9 @@ INT_PTR CALLBACK StartMenu11PageProc(
         {
         case BN_CLICKED:
             HandleCommand(LOWORD(wParam));
+            break;
+        case CBN_SELCHANGE:
+            HandleComboBoxSelChange(LOWORD(wParam));
             break;
         }
 
@@ -1138,6 +1203,9 @@ INT_PTR CALLBACK NotificationPageProc(
         case BN_CLICKED:
             HandleCommand(LOWORD(wParam));
             break;
+        case CBN_SELCHANGE:
+            HandleComboBoxSelChange(LOWORD(wParam));
+            break;
         }
 
         return 0;
@@ -1178,6 +1246,9 @@ INT_PTR CALLBACK AdvancedPageProc(
         {
         case BN_CLICKED:
             HandleCommand(LOWORD(wParam));
+            break;
+        case CBN_SELCHANGE:
+            HandleComboBoxSelChange(LOWORD(wParam));
             break;
         }
 

@@ -503,6 +503,7 @@ BOOL WriteExplorerSettings(void)
     UpdateDword(TEXT("MMTaskbarGlomLevel"), iMmCombineButtons);
     UpdateDword(TEXT("EnableAeroPeek"), bPeek);
 	
+	if (HasChanged(iPowerOptions)) {
 		if (g_newSettings.iPowerOptions == 0) {
 			dwData = 256; // Switch User
 		}
@@ -526,7 +527,8 @@ BOOL WriteExplorerSettings(void)
             RestoreSetting(iPowerOptions); 
             ret = FALSE; 
         } 
-		
+	}
+	
 	UpdateDword(TEXT("Start_TrackProgs"), bTrackProgs);
 	UpdateDword(TEXT("Start_TrackDocs"), bTrackDocs);
 	
